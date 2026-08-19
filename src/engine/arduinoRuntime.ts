@@ -1,4 +1,4 @@
-﻿import { PinManager } from './pinManager';
+import { PinManager } from './pinManager';
 import { i2cBus } from './i2cBus';
 import { audioSynth } from '../utils/audioSynthesizer';
 import { SerialLogMessage, SimulationState } from '../types/simulation';
@@ -89,7 +89,25 @@ export class ArduinoRuntime {
     // 3. Remove #include statements
     js = js.replace(/#include\s*[<"][^>"]+[>"]/g, '');
 
-    // 4. Replace variable types (int, float, double, bool, boolean, char, String, uint8_t, unsigned long, long, byte) with let/const
+    // 4. Replace C++ function definitions first before variable type replacement (e.g. void setup() -> async function setup())
+    js = js.replace(/\b(void|int|float|double|bool|String|char|long|uint8_t|uint16_t|uint32_t)\s+([A-Za-z0-9_]+)\s*\(([^)]*)\)\s*\{/g, (_m, _ret, fnName, params) => {
+      // Clean types inside parameter list: (int a, float b) -> (a, b)
+      const cleanParams = params.replace(/\b(unsigned\s+long|unsigned\s+int|long\s+long|int|float|double|bool|boolean|char|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|byte|size_t)\s+/g, '');
+      return `async function ${fnName}(${cleanParams}) {`;
+    });
+
+    // 5. Replace BLYNK_WRITE(vPin) -> async function BLYNK_WRITE_vPin(param)
+    js = js.replace(/BLYNK_WRITE\s*\(\s*([A-Za-z0-9_]+)\s*\)\s*\{/g, 'async function BLYNK_WRITE_$1(param) {');
+
+    // 6. Handle C++ object instantiations
+    js = js.replace(/\bLiquidCrystal_I2C\s+([A-Za-z0-9_]+)\s*\(([^)]*)\);/g, 'const $1 = new LiquidCrystal_I2C($2);');
+    js = js.replace(/\bDHT\s+([A-Za-z0-9_]+)\s*\(([^)]*)\);/g, 'const $1 = new DHT($2);');
+    js = js.replace(/\bServo\s+([A-Za-z0-9_]+);/g, 'const $1 = new Servo();');
+
+    // 7. Replace const <type> with const (e.g. const int pin = 13 -> const pin = 13)
+    js = js.replace(/\b(const|static\s+const)\s+(unsigned\s+long|unsigned\s+int|long\s+long|unsigned\s+char|int|float|double|bool|boolean|char|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|byte|size_t)\s+/g, 'const ');
+
+    // 8. Replace standalone variable types with let (e.g. int val = 0 -> let val = 0)
     const typeRegex = /\b(unsigned\s+long|unsigned\s+int|long\s+long|unsigned\s+char|int|float|double|bool|boolean|char|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|byte|size_t)\s+([A-Za-z0-9_]+)\s*(\[.*?\])?/g;
     js = js.replace(typeRegex, (_match, _type, varName, isArray) => {
       if (isArray) {
@@ -98,20 +116,14 @@ export class ArduinoRuntime {
       return `let ${varName}`;
     });
 
-    // 5. Replace C++ function definitions (e.g. void setup() -> async function setup())
-    js = js.replace(/\b(void|int|float|double|bool|String)\s+([A-Za-z0-9_]+)\s*\(([^)]*)\)\s*\{/g, 'async function $2($3) {');
+    // 9. Clean up any accidental double keywords like `const let` or `let let`
+    js = js.replace(/\bconst\s+let\b/g, 'const');
+    js = js.replace(/\blet\s+let\b/g, 'let');
+    js = js.replace(/\blet\s+const\b/g, 'const');
 
-    // 6. Replace BLYNK_WRITE(vPin) -> async function BLYNK_WRITE_vPin(param)
-    js = js.replace(/BLYNK_WRITE\s*\(\s*([A-Za-z0-9_]+)\s*\)\s*\{/g, 'async function BLYNK_WRITE_$1(param) {');
-
-    // 7. Inject delays with await
+    // 10. Inject delays with await
     js = js.replace(/\bdelay\s*\(/g, 'await delay(');
     js = js.replace(/\bdelayMicroseconds\s*\(/g, 'await delayMicroseconds(');
-
-    // 8. Replace C++ object instantiations like LiquidCrystal_I2C lcd(0x27, 16, 2); -> const lcd = new LiquidCrystal_I2C(0x27, 16, 2);
-    js = js.replace(/\bLiquidCrystal_I2C\s+([A-Za-z0-9_]+)\s*\(([^)]*)\);/g, 'const $1 = new LiquidCrystal_I2C($2);');
-    js = js.replace(/\bDHT\s+([A-Za-z0-9_]+)\s*\(([^)]*)\);/g, 'const $1 = new DHT($2);');
-    js = js.replace(/\bServo\s+([A-Za-z0-9_]+);/g, 'const $1 = new Servo();');
 
     return js;
   }

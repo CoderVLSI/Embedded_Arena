@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { CircuitComponent, WireConnection, ComponentType, DiagramConfig, ProjectFile } from './types/circuit';
 import { SerialLogMessage, SimulationState } from './types/simulation';
 import { PinManager } from './engine/pinManager';
@@ -227,6 +227,7 @@ const App: React.FC = () => {
               onAddWire={handleAddWire}
               onDeleteWire={handleDeleteWire}
               onDeleteComponent={handleDeleteComponent}
+              onOpenAddPalette={() => setPaletteOpen(true)}
             />
           </div>
 

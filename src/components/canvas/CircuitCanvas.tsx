@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { CircuitComponent, WireConnection, ComponentType } from '../../types/circuit';
 import { Esp32DevKit } from '../parts/Esp32DevKit';
 import { ArduinoUno } from '../parts/ArduinoUno';
@@ -28,6 +28,7 @@ interface Props {
   onAddWire: (wire: WireConnection) => void;
   onDeleteWire: (wireId: string) => void;
   onDeleteComponent: (id: string) => void;
+  onOpenAddPalette?: () => void;
 }
 
 export const CircuitCanvas: React.FC<Props> = ({
@@ -39,6 +40,7 @@ export const CircuitCanvas: React.FC<Props> = ({
   onAddWire,
   onDeleteWire,
   onDeleteComponent,
+  onOpenAddPalette,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -367,6 +369,22 @@ export const CircuitCanvas: React.FC<Props> = ({
           onSelectWire={setSelectedWireId}
           onDeleteWire={onDeleteWire}
         />
+      </div>
+
+      {/* Top Left Simulation Canvas Toolbar */}
+      <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+        <button
+          onClick={onOpenAddPalette}
+          className="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-lg transition hover:scale-105 active:scale-95"
+        >
+          <span className="text-base leading-none font-bold">+</span> Add Part
+        </button>
+
+        {activeWireStart && (
+          <div className="bg-sky-950/90 border border-sky-500 text-sky-200 text-xs px-3 py-1 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur animate-pulse">
+            <span>Click any target pin to connect wire (or Esc to cancel)</span>
+          </div>
+        )}
       </div>
 
       {/* Wire Color Picker Toolbar & Controls */}
