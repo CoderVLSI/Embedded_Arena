@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { STARTER_PROJECTS } from '../../engine/examples';
 import { ProjectFile } from '../../types/circuit';
 import { SimulationState } from '../../types/simulation';
 import {
   Play, Pause, Square, Plus, FolderOpen, Download,
-  Cpu, ChevronDown, Zap, ExternalLink
+  BookOpen, ChevronDown, Zap, ExternalLink, Heart, Share2
 } from 'lucide-react';
 
 interface Props {
@@ -15,6 +15,7 @@ interface Props {
   onLoadProject: (project: ProjectFile) => void;
   onAddComponent: () => void;
   onExportProject: () => void;
+  onOpenDocs: () => void;
   projectName: string;
 }
 
@@ -26,9 +27,11 @@ export const TopNavBar: React.FC<Props> = ({
   onLoadProject,
   onAddComponent,
   onExportProject,
+  onOpenDocs,
   projectName,
 }) => {
   const [showExamples, setShowExamples] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const formatTime = (ms: number) => {
     const s = ms / 1000;
@@ -37,124 +40,150 @@ export const TopNavBar: React.FC<Props> = ({
     return `${m}m ${(s % 60).toFixed(0)}s`;
   };
 
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
   return (
-    <div className="flex items-center justify-between h-12 px-4 bg-[#1a1a2e] border-b border-[#2d2d44] select-none shadow-lg z-30">
-      {/* Left: Brand + Simulation Controls */}
-      <div className="flex items-center gap-4">
-        {/* Brand */}
-        <div className="flex items-center gap-2 mr-2">
-          <div className="w-7 h-7 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
-            <Cpu size={16} className="text-white" />
-          </div>
-          <div>
-            <h1 className="text-sm font-bold text-white leading-none tracking-tight">Embedded Arena</h1>
-            <p className="text-[9px] text-slate-400 leading-none mt-0.5">Circuit Simulator</p>
+    <div className="flex items-center justify-between h-11 px-3 bg-[#18181c] border-b border-[#2a2a30] select-none shadow-md z-30">
+      {/* Left: Authentic Wokwi-style Logo & Controls */}
+      <div className="flex items-center gap-3">
+        {/* Clean Logo */}
+        <div className="flex items-center gap-2 pr-2 border-r border-[#2d2d35]">
+          <div className="flex items-center gap-1.5 cursor-pointer">
+            <span className="font-extrabold tracking-tighter text-base text-white font-sans">
+              EMBEDDED<span className="text-sky-400">ARENA</span>
+            </span>
           </div>
         </div>
 
-        {/* Simulation Controls */}
-        <div className="flex items-center gap-1 bg-[#252540] rounded-lg p-0.5 border border-slate-700/50">
+        {/* Simulation Run / Pause / Stop Button */}
+        <div className="flex items-center gap-1">
           {!simState.isRunning ? (
             <button
               onClick={onPlay}
-              className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-md text-xs font-semibold transition shadow"
+              className="flex items-center gap-1.5 bg-[#22c55e] hover:bg-[#16a34a] text-white px-3 py-1 rounded text-xs font-bold transition shadow-sm"
             >
-              <Play size={14} fill="currentColor" /> Run
+              <Play size={13} fill="currentColor" /> Run
             </button>
           ) : (
             <>
               <button
                 onClick={onPause}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition ${
+                className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold transition ${
                   simState.isPaused
                     ? 'bg-amber-600 hover:bg-amber-500 text-white'
-                    : 'bg-amber-600/20 hover:bg-amber-600/40 text-amber-300 border border-amber-600/40'
+                    : 'bg-amber-600/20 hover:bg-amber-600/40 text-amber-300 border border-amber-600/50'
                 }`}
               >
-                <Pause size={13} /> {simState.isPaused ? 'Resume' : 'Pause'}
+                <Pause size={12} /> {simState.isPaused ? 'Resume' : 'Pause'}
               </button>
               <button
                 onClick={onStop}
-                className="flex items-center gap-1 bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-700/40 px-2.5 py-1.5 rounded-md text-xs font-medium transition"
+                className="flex items-center gap-1 bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-700/50 px-2.5 py-1 rounded text-xs font-semibold transition"
               >
-                <Square size={13} fill="currentColor" /> Stop
+                <Square size={12} fill="currentColor" /> Stop
               </button>
             </>
           )}
+
+          {/* Add Part (+) Button */}
+          <button
+            onClick={onAddComponent}
+            className="flex items-center justify-center w-7 h-7 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-bold transition shadow"
+            title="Add Electronics Component"
+          >
+            <Plus size={15} />
+          </button>
         </div>
 
-        {/* Sim Timer */}
+        {/* Timer */}
         {simState.isRunning && (
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono bg-slate-800/60 px-2.5 py-1 rounded border border-slate-700/50">
-            <Zap size={12} className="text-emerald-400" />
-            <span className="text-emerald-300">{formatTime(simState.timeMs)}</span>
+          <div className="flex items-center gap-1 text-[11px] text-slate-300 font-mono bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
+            <Zap size={11} className="text-emerald-400" />
+            <span className="text-emerald-300 font-semibold">{formatTime(simState.timeMs)}</span>
           </div>
         )}
       </div>
 
-      {/* Center: Project Name */}
-      <div className="text-xs text-slate-300 font-medium truncate max-w-[250px]">
-        {projectName}
+      {/* Center: Project Title */}
+      <div className="hidden md:flex items-center gap-2 text-xs text-slate-300 font-medium truncate max-w-md">
+        <span className="text-slate-400">Project:</span>
+        <span className="text-white font-semibold truncate">{projectName}</span>
       </div>
 
-      {/* Right: Actions */}
+      {/* Right: Actions (Examples, Docs, Share, Export) */}
       <div className="flex items-center gap-2">
-        {/* Add Component */}
-        <button
-          onClick={onAddComponent}
-          className="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition shadow"
-        >
-          <Plus size={14} /> Add Part
-        </button>
-
-        {/* Load Example */}
+        {/* Load Example Dropdown */}
         <div className="relative">
           <button
             onClick={() => setShowExamples(!showExamples)}
-            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition border border-slate-700"
+            className="flex items-center gap-1.5 bg-[#25252b] hover:bg-[#2f2f37] text-slate-200 px-2.5 py-1 rounded text-xs font-medium transition border border-slate-700"
           >
-            <FolderOpen size={14} /> Examples <ChevronDown size={12} />
+            <FolderOpen size={13} /> Examples <ChevronDown size={11} />
           </button>
 
           {showExamples && (
             <div className="absolute right-0 top-full mt-1.5 w-80 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-[400px] overflow-y-auto">
               <div className="p-2.5 border-b border-slate-800">
-                <p className="text-[11px] text-slate-400 font-semibold">📦 Starter Projects (click to load)</p>
+                <p className="text-[11px] text-slate-400 font-semibold">Starter Circuits</p>
               </div>
               {STARTER_PROJECTS.map((proj) => (
                 <button
                   key={proj.id}
-                  className="w-full text-left px-3.5 py-2.5 hover:bg-slate-800 border-b border-slate-800/50 transition"
+                  className="w-full text-left px-3.5 py-2 hover:bg-slate-800 border-b border-slate-800/50 transition"
                   onClick={() => {
                     onLoadProject(proj);
                     setShowExamples(false);
                   }}
                 >
                   <div className="text-xs font-semibold text-white">{proj.name}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5 line-clamp-2">{proj.description}</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">{proj.description}</div>
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Export */}
+        {/* Documentation Button */}
         <button
-          onClick={onExportProject}
-          className="flex items-center gap-1 text-slate-300 hover:text-white px-2 py-1.5 rounded-lg text-xs hover:bg-slate-800 transition"
-          title="Export project as JSON"
+          onClick={onOpenDocs}
+          className="flex items-center gap-1 text-slate-300 hover:text-white bg-[#25252b] hover:bg-[#2f2f37] border border-slate-700 px-2.5 py-1 rounded text-xs font-medium transition"
         >
-          <Download size={14} />
+          <BookOpen size={13} className="text-sky-400" />
+          Docs
         </button>
 
-        {/* GitHub */}
+        {/* Share Button */}
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-1 text-slate-300 hover:text-white bg-[#25252b] hover:bg-[#2f2f37] border border-slate-700 px-2.5 py-1 rounded text-xs font-medium transition"
+          title="Copy project link"
+        >
+          <Share2 size={13} />
+          {isCopied ? <span className="text-emerald-400">Copied!</span> : <span>Share</span>}
+        </button>
+
+        {/* Export JSON */}
+        <button
+          onClick={onExportProject}
+          className="flex items-center gap-1 text-slate-400 hover:text-white p-1.5 rounded hover:bg-slate-800 transition"
+          title="Export project JSON"
+        >
+          <Download size={15} />
+        </button>
+
+        {/* GitHub Link */}
         <a
           href="https://github.com/CoderVLSI/Embedded_Arena"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 text-slate-400 hover:text-white px-2 py-1.5 rounded-lg text-xs hover:bg-slate-800 transition"
+          className="flex items-center gap-1 text-slate-400 hover:text-white p-1.5 rounded hover:bg-slate-800 transition"
+          title="GitHub Repository"
         >
-          <ExternalLink size={16} />
+          <ExternalLink size={15} />
         </a>
       </div>
     </div>

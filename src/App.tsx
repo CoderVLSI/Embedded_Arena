@@ -10,6 +10,7 @@ import { CodeEditor } from './components/editor/CodeEditor';
 import { CircuitCanvas } from './components/canvas/CircuitCanvas';
 import { ComponentPalette } from './components/canvas/ComponentPalette';
 import { TerminalPanel } from './components/terminal/TerminalPanel';
+import { DocsModal } from './components/docs/DocsModal';
 
 const defaultProject = STARTER_PROJECTS[0];
 
@@ -65,8 +66,9 @@ const App: React.FC = () => {
   const [serialLogs, setSerialLogs] = useState<SerialLogMessage[]>([]);
   const [baudRate, setBaudRate] = useState(9600);
 
-  // Component palette
+  // Component palette & Docs modals
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [docsOpen, setDocsOpen] = useState(false);
 
   // Pin manager & runtime (persistent refs)
   const pinManagerRef = useRef(new PinManager());
@@ -194,6 +196,7 @@ const App: React.FC = () => {
         onLoadProject={handleLoadProject}
         onAddComponent={() => setPaletteOpen(true)}
         onExportProject={handleExportProject}
+        onOpenDocs={() => setDocsOpen(true)}
         projectName={projectName}
       />
 
@@ -248,6 +251,12 @@ const App: React.FC = () => {
         isOpen={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         onAddComponent={handleAddComponent}
+      />
+
+      {/* Hardware & Arduino Documentation Modal */}
+      <DocsModal
+        isOpen={docsOpen}
+        onClose={() => setDocsOpen(false)}
       />
     </div>
   );
