@@ -2,6 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { CircuitComponent, WireConnection, ComponentType } from '../../types/circuit';
 import { Esp32DevKit } from '../parts/Esp32DevKit';
 import { ArduinoUno } from '../parts/ArduinoUno';
+import { RaspberryPiPico } from '../parts/RaspberryPiPico';
+import { Stm32BluePill } from '../parts/Stm32BluePill';
+import { Esp8266NodeMcu } from '../parts/Esp8266NodeMcu';
+import { PicMicrocontroller } from '../parts/PicMicrocontroller';
+import { Nrf52840Dk } from '../parts/Nrf52840Dk';
 import { DhtSensor } from '../parts/DhtSensor';
 import { RelayModule } from '../parts/RelayModule';
 import { Led } from '../parts/Led';
@@ -189,6 +194,51 @@ export const CircuitCanvas: React.FC<Props> = ({
       case 'wokwi-esp32-devkit-v1':
         innerElement = (
           <Esp32DevKit
+            component={comp}
+            onPinClick={(p, e) => handlePinClick(comp.id, p, e)}
+            selectedPin={activeWireStart ? `${activeWireStart.compId}:${activeWireStart.pinId}` : null}
+          />
+        );
+        break;
+      case 'wokwi-pi-pico':
+        innerElement = (
+          <RaspberryPiPico
+            component={comp}
+            onPinClick={(p, e) => handlePinClick(comp.id, p, e)}
+            selectedPin={activeWireStart ? `${activeWireStart.compId}:${activeWireStart.pinId}` : null}
+          />
+        );
+        break;
+      case 'wokwi-stm32-bluepill':
+        innerElement = (
+          <Stm32BluePill
+            component={comp}
+            onPinClick={(p, e) => handlePinClick(comp.id, p, e)}
+            selectedPin={activeWireStart ? `${activeWireStart.compId}:${activeWireStart.pinId}` : null}
+          />
+        );
+        break;
+      case 'wokwi-esp8266-nodemcu':
+        innerElement = (
+          <Esp8266NodeMcu
+            component={comp}
+            onPinClick={(p, e) => handlePinClick(comp.id, p, e)}
+            selectedPin={activeWireStart ? `${activeWireStart.compId}:${activeWireStart.pinId}` : null}
+          />
+        );
+        break;
+      case 'wokwi-pic16f877a':
+        innerElement = (
+          <PicMicrocontroller
+            component={comp}
+            onPinClick={(p, e) => handlePinClick(comp.id, p, e)}
+            selectedPin={activeWireStart ? `${activeWireStart.compId}:${activeWireStart.pinId}` : null}
+          />
+        );
+        break;
+      case 'wokwi-nrf52840-dk':
+        innerElement = (
+          <Nrf52840Dk
             component={comp}
             onPinClick={(p, e) => handlePinClick(comp.id, p, e)}
             selectedPin={activeWireStart ? `${activeWireStart.compId}:${activeWireStart.pinId}` : null}

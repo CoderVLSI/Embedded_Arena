@@ -39,6 +39,69 @@ function ComponentThumbnail({ type, attrs }: { type: ComponentType; attrs?: Reco
         </svg>
       );
 
+    case 'wokwi-pi-pico':
+      return (
+        <svg width={size} height={size} viewBox="0 0 48 48">
+          <rect x="10" y="3" width="28" height="42" rx="3" fill="#008053" stroke="#00a86b" strokeWidth="1" />
+          <rect x="18" y="1" width="12" height="5" rx="1" fill="#cbd5e1" />
+          <rect x="18" y="18" width="12" height="12" rx="1" fill="#0f172a" stroke="#334155" strokeWidth="0.5" />
+          <text x="24" y="26" fill="#f8fafc" fontSize="3.5" fontWeight="bold" textAnchor="middle">RP2040</text>
+          <circle cx="24" cy="12" r="2.5" fill="#f8fafc" />
+          <text x="24" y="38" fill="#fff" fontSize="5" fontWeight="bold" textAnchor="middle">Pico</text>
+        </svg>
+      );
+
+    case 'wokwi-stm32-bluepill':
+      return (
+        <svg width={size} height={size} viewBox="0 0 48 48">
+          <rect x="10" y="3" width="28" height="42" rx="3" fill="#1e3a8a" stroke="#1d4ed8" strokeWidth="1" />
+          <rect x="18" y="1" width="12" height="5" rx="1" fill="#cbd5e1" />
+          <rect x="18" y="18" width="12" height="12" rx="1" fill="#0f172a" stroke="#334155" strokeWidth="0.5" />
+          <text x="24" y="26" fill="#f8fafc" fontSize="3" fontWeight="bold" textAnchor="middle">STM32</text>
+          <rect x="15" y="8" width="4" height="6" rx="0.5" fill="#eab308" />
+          <rect x="21" y="8" width="4" height="6" rx="0.5" fill="#eab308" />
+          <circle cx="24" cy="38" r="2" fill="#dc2626" />
+        </svg>
+      );
+
+    case 'wokwi-esp8266-nodemcu':
+      return (
+        <svg width={size} height={size} viewBox="0 0 48 48">
+          <rect x="10" y="3" width="28" height="42" rx="3" fill="#18181b" stroke="#3f3f46" strokeWidth="1" />
+          <rect x="14" y="6" width="20" height="14" rx="1" fill="#9ca3af" stroke="#4b5563" strokeWidth="0.5" />
+          <text x="24" y="15" fill="#111827" fontSize="4" fontWeight="bold" textAnchor="middle">ESP8266</text>
+          <text x="24" y="32" fill="#f8fafc" fontSize="4.5" fontWeight="bold" textAnchor="middle">NodeMCU</text>
+          <rect x="18" y="42" width="12" height="5" rx="1" fill="#cbd5e1" />
+        </svg>
+      );
+
+    case 'wokwi-pic16f877a':
+      return (
+        <svg width={size} height={size} viewBox="0 0 48 48">
+          <rect x="12" y="4" width="24" height="40" rx="2" fill="#18181b" stroke="#3f3f46" strokeWidth="1" />
+          <path d="M 21 4 A 3 3 0 0 0 27 4 Z" fill="#09090b" />
+          <text x="24" y="26" fill="#f8fafc" fontSize="4" fontWeight="bold" textAnchor="middle">PIC16F</text>
+          {/* DIP legs */}
+          {[8, 14, 20, 26, 32, 38].map((y) => (
+            <g key={y}>
+              <rect x="7" y={y} width="5" height="2" fill="#d1d5db" />
+              <rect x="36" y={y} width="5" height="2" fill="#d1d5db" />
+            </g>
+          ))}
+        </svg>
+      );
+
+    case 'wokwi-nrf52840-dk':
+      return (
+        <svg width={size} height={size} viewBox="0 0 48 48">
+          <rect x="10" y="3" width="28" height="42" rx="3" fill="#065f46" stroke="#047857" strokeWidth="1" />
+          <rect x="15" y="6" width="18" height="6" rx="1" fill="#047857" stroke="#fbbf24" strokeWidth="0.8" />
+          <rect x="18" y="18" width="12" height="12" rx="1" fill="#0f172a" />
+          <text x="24" y="26" fill="#6ee7b7" fontSize="3" fontWeight="bold" textAnchor="middle">nRF52</text>
+          <text x="24" y="38" fill="#fff" fontSize="4.5" fontWeight="bold" textAnchor="middle">BLE DK</text>
+        </svg>
+      );
+
     case 'wokwi-arduino-uno':
       return (
         <svg width={size} height={size} viewBox="0 0 48 48">
@@ -263,8 +326,13 @@ function ComponentThumbnail({ type, attrs }: { type: ComponentType; attrs?: Reco
 }
 
 const ITEMS: PaletteItem[] = [
-  { type: 'wokwi-esp32-devkit-v1', name: 'ESP32 DevKit v1', category: 'MCU', description: 'Dual-core WiFi & Bluetooth IoT microcontroller' },
   { type: 'wokwi-arduino-uno', name: 'Arduino Uno R3', category: 'MCU', description: 'Classic ATmega328P microcontroller board' },
+  { type: 'wokwi-esp32-devkit-v1', name: 'ESP32 DevKit v1', category: 'MCU', description: 'Dual-core WiFi & Bluetooth IoT microcontroller' },
+  { type: 'wokwi-pi-pico', name: 'Raspberry Pi Pico', category: 'MCU', description: 'RP2040 Dual ARM Cortex-M0+ 133MHz board' },
+  { type: 'wokwi-stm32-bluepill', name: 'STM32 Blue Pill', category: 'MCU', description: 'STM32F103C8T6 ARM Cortex-M3 72MHz board' },
+  { type: 'wokwi-esp8266-nodemcu', name: 'ESP8266 NodeMCU', category: 'MCU', description: 'WiFi IoT microcontroller development board' },
+  { type: 'wokwi-pic16f877a', name: 'PIC16F877A Microcontroller', category: 'MCU', description: 'Microchip 40-pin DIP university lab microcontroller' },
+  { type: 'wokwi-nrf52840-dk', name: 'Nordic nRF52840 DK', category: 'MCU', description: 'Bluetooth Low Energy (BLE) & 802.15.4 ARM board' },
   { type: 'wokwi-led', name: 'Red LED', category: 'Actuators', description: '5mm standard through-hole LED', attrs: { color: 'red' } },
   { type: 'wokwi-led', name: 'Green LED', category: 'Actuators', description: '5mm green LED', attrs: { color: 'green' } },
   { type: 'wokwi-led', name: 'Blue LED', category: 'Actuators', description: '5mm blue LED', attrs: { color: 'blue' } },

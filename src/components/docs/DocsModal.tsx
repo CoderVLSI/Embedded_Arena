@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Book, Cpu, Zap, Code, HelpCircle, X, ChevronRight, Layers, Terminal, Sliders } from 'lucide-react';
 
 interface Props {
@@ -144,79 +144,105 @@ export const DocsModal: React.FC<Props> = ({ isOpen, onClose }) => {
             )}
 
             {activeSection === 'pinouts' && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Cpu className="text-sky-400" size={20} /> Microcontroller Pinout Reference
-                </h3>
-
-                {/* Arduino Uno */}
-                <div className="p-4 bg-[#20212d] border border-slate-700/60 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-sky-300 text-sm">Arduino Uno R3 (ATmega328P)</h4>
-                    <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">5.0V Logic</span>
-                  </div>
-                  <ul className="text-xs text-slate-300 space-y-1 list-disc list-inside">
-                    <li><strong>Digital Pins 0 to 13</strong>: General purpose I/O. Pins 3, 5, 6, 9, 10, 11 support PWM output with <code>analogWrite()</code>.</li>
-                    <li><strong>Pin 13</strong>: Connected to onboard "L" LED indicator.</li>
-                    <li><strong>Analog Pins A0 to A5</strong>: 10-bit ADC inputs (0 to 1023) via <code>analogRead()</code>.</li>
-                    <li><strong>I2C Bus</strong>: <strong>A4 (SDA)</strong> and <strong>A5 (SCL)</strong> for LCDs, OLEDs, and RTC modules.</li>
-                    <li><strong>Power Pins</strong>: 5V, 3.3V, GND, VIN, RESET.</li>
-                  </ul>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Cpu className="text-sky-400" size={20} /> College Lab Microcontroller Pinout Posters & Specs
+                  </h3>
+                  <span className="text-xs text-sky-400 bg-sky-950/60 border border-sky-600/40 px-2.5 py-1 rounded-full font-medium">
+                    University Lab Reference
+                  </span>
                 </div>
 
-                {/* ESP32 */}
-                <div className="p-4 bg-[#20212d] border border-slate-700/60 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-purple-300 text-sm">ESP32 DevKit v1 (NodeMCU-32S)</h4>
-                    <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">3.3V Logic</span>
+                {/* Lab Poster 1: Arduino Uno Pinout */}
+                <div className="space-y-2">
+                  <h4 className="font-bold text-white text-sm flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-sky-400" />
+                    Arduino Uno R3 Engineering Reference Chart
+                  </h4>
+                  <div className="rounded-xl overflow-hidden border border-slate-700/80 shadow-2xl bg-black">
+                    <img
+                      src="/images/arduino_uno_pinout.jpg"
+                      alt="Arduino Uno R3 Pinout Reference"
+                      className="w-full h-auto object-cover hover:scale-105 transition-transform duration-300 cursor-zoom-in"
+                    />
                   </div>
-                  <ul className="text-xs text-slate-300 space-y-1 list-disc list-inside">
-                    <li><strong>GPIO Pins</strong>: D2, D4, D5, D12, D13, D14, D15, D16, D17, D18, D19, D21, D22, D23, D25, D26, D27, D32, D33, D34, D35.</li>
-                    <li><strong>Onboard Blue LED</strong>: GPIO 2 (<code>LED_BUILTIN</code>).</li>
-                    <li><strong>I2C Default</strong>: <strong>GPIO 21 (SDA)</strong> and <strong>GPIO 22 (SCL)</strong>.</li>
-                    <li><strong>SPI Default</strong>: MOSI (23), MISO (19), SCK (18), CS (5).</li>
-                    <li><strong>Power</strong>: 3V3, 5V (VIN), and GND.</li>
-                  </ul>
+                </div>
+
+                {/* Lab Poster 2: ESP32 DevKit V1 Pinout */}
+                <div className="space-y-2 pt-4">
+                  <h4 className="font-bold text-white text-sm flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-purple-400" />
+                    ESP32 NodeMCU DevKit V1 Pinout & Architecture
+                  </h4>
+                  <div className="rounded-xl overflow-hidden border border-slate-700/80 shadow-2xl bg-black">
+                    <img
+                      src="/images/esp32_devkit_pinout.jpg"
+                      alt="ESP32 DevKit V1 Pinout"
+                      className="w-full h-auto object-cover hover:scale-105 transition-transform duration-300 cursor-zoom-in"
+                    />
+                  </div>
+                </div>
+
+                {/* College Lab Board Specs Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                  {/* Raspberry Pi Pico */}
+                  <div className="p-4 bg-[#20212d] border border-slate-700/60 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-emerald-300 text-sm">Raspberry Pi Pico (RP2040)</h4>
+                      <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">3.3V / 133MHz</span>
+                    </div>
+                    <p className="text-xs text-slate-300">Dual-core ARM Cortex-M0+ with 26 multi-function GPIO pins, 3 ADC analog inputs (GP26-GP28), 2 UARTs, 2 SPI, 2 I2C, and 16 PWM channels.</p>
+                  </div>
+
+                  {/* STM32 Blue Pill */}
+                  <div className="p-4 bg-[#20212d] border border-slate-700/60 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-sky-300 text-sm">STM32 Blue Pill (STM32F103C8T6)</h4>
+                      <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">3.3V / 72MHz</span>
+                    </div>
+                    <p className="text-xs text-slate-300">32-bit ARM Cortex-M3 processor, 64KB Flash, 20KB SRAM, 32 GPIO pins (PA0-PA15, PB0-PB15), 10 ADC channels, and built-in USB 2.0.</p>
+                  </div>
+
+                  {/* PIC16F877A */}
+                  <div className="p-4 bg-[#20212d] border border-slate-700/60 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-amber-300 text-sm">PIC16F877A (DIP-40 Lab IC)</h4>
+                      <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">5.0V / 20MHz</span>
+                    </div>
+                    <p className="text-xs text-slate-300">Standard university embedded lab PIC microcontroller. 5 I/O ports (PORTA to PORTE), 8-channel 10-bit ADC, CCP capture/compare/PWM, and USART.</p>
+                  </div>
+
+                  {/* ESP8266 NodeMCU */}
+                  <div className="p-4 bg-[#20212d] border border-slate-700/60 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-blue-300 text-sm">ESP8266 NodeMCU (ESP-12E)</h4>
+                      <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">3.3V / 80MHz</span>
+                    </div>
+                    <p className="text-xs text-slate-300">Tensilica Xtensa 32-bit processor with integrated 802.11 b/g/n WiFi, 4MB Flash, 10 GPIOs (D0-D8), and 1 10-bit ADC (A0).</p>
+                  </div>
                 </div>
               </div>
             )}
 
             {activeSection === 'sensors' && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Layers className="text-emerald-400" size={20} /> Sensors & Actuators Guide
-                </h3>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Layers className="text-emerald-400" size={20} /> College Lab Sensors & Actuators Chart
+                  </h3>
+                  <span className="text-xs text-emerald-400 bg-emerald-950/60 border border-emerald-600/40 px-2.5 py-1 rounded-full font-medium">
+                    Wiring & Specifications
+                  </span>
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                  <div className="p-3.5 bg-[#20212d] border border-slate-700/60 rounded-xl space-y-1">
-                    <h4 className="font-bold text-white">DHT22 Temperature & Humidity</h4>
-                    <p className="text-slate-400">Pins: VCC (3.3V/5V), SDA (Data), NC, GND. Use <code>dht.readTemperature()</code> and <code>dht.readHumidity()</code>.</p>
-                  </div>
-
-                  <div className="p-3.5 bg-[#20212d] border border-slate-700/60 rounded-xl space-y-1">
-                    <h4 className="font-bold text-white">HC-SR04 Ultrasonic Distance</h4>
-                    <p className="text-slate-400">Pins: VCC (5V), TRIG (Pulse trigger), ECHO (Pulse duration), GND. Measure distance with <code>pulseIn()</code>.</p>
-                  </div>
-
-                  <div className="p-3.5 bg-[#20212d] border border-slate-700/60 rounded-xl space-y-1">
-                    <h4 className="font-bold text-white">16x2 I2C LCD Display</h4>
-                    <p className="text-slate-400">Address 0x27. Pins: GND, VCC (5V), SDA, SCL. Use <code>lcd.setCursor(col, row)</code> and <code>lcd.print("text")</code>.</p>
-                  </div>
-
-                  <div className="p-3.5 bg-[#20212d] border border-slate-700/60 rounded-xl space-y-1">
-                    <h4 className="font-bold text-white">SG90 Micro Servo Motor</h4>
-                    <p className="text-slate-400">Pins: GND (Brown), V+ (Red), PWM (Orange). Rotate with <code>servo.write(angle)</code> between 0° and 180°.</p>
-                  </div>
-
-                  <div className="p-3.5 bg-[#20212d] border border-slate-700/60 rounded-xl space-y-1">
-                    <h4 className="font-bold text-white">5V Relay Module</h4>
-                    <p className="text-slate-400">Pins: VCC, GND, IN (Control). Terminal contacts: NO (Normally Open), COM, NC (Normally Closed).</p>
-                  </div>
-
-                  <div className="p-3.5 bg-[#20212d] border border-slate-700/60 rounded-xl space-y-1">
-                    <h4 className="font-bold text-white">Piezo Buzzer</h4>
-                    <p className="text-slate-400">Pins: (+) Signal, (-) GND. Generates real audio tones using <code>tone(pin, freq, duration)</code>.</p>
-                  </div>
+                {/* Sensors Reference Chart Poster */}
+                <div className="rounded-xl overflow-hidden border border-slate-700/80 shadow-2xl bg-black">
+                  <img
+                    src="/images/sensors_lab_reference.jpg"
+                    alt="Sensors and Actuators Lab Chart"
+                    className="w-full h-auto object-cover hover:scale-105 transition-transform duration-300 cursor-zoom-in"
+                  />
                 </div>
               </div>
             )}

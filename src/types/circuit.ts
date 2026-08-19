@@ -1,6 +1,11 @@
-﻿export type ComponentType =
+export type ComponentType =
   | 'wokwi-arduino-uno'
   | 'wokwi-esp32-devkit-v1'
+  | 'wokwi-pi-pico'
+  | 'wokwi-stm32-bluepill'
+  | 'wokwi-esp8266-nodemcu'
+  | 'wokwi-nrf52840-dk'
+  | 'wokwi-pic16f877a'
   | 'wokwi-arduino-nano'
   | 'wokwi-arduino-mega'
   | 'wokwi-led'
