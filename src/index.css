@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html, body, #root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    user-select: none;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+::-webkit-scrollbar-thumb {
+  background: #3e3e42;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #55555c;
+}
+
+/* Grid dot pattern for canvas */
+.canvas-grid {
+  background-image: radial-gradient(circle, #3a3a3a 1.2px, transparent 1.2px);
+  background-size: 20px 20px;
+}
+
+.canvas-grid-subtle {
+  background-image: radial-gradient(circle, #2d2d2d 1px, transparent 1px);
+  background-size: 15px 15px;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(255, 68, 68, 0.9)) drop-shadow(0 0 12px rgba(255, 68, 68, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(255, 68, 68, 1)) drop-shadow(0 0 20px rgba(255, 68, 68, 0.8));
+  }
+}
+
+.led-glow-red {
+  filter: drop-shadow(0 0 8px #ff3b30) drop-shadow(0 0 16px #ff453a);
+}
+
+.led-glow-green {
+  filter: drop-shadow(0 0 8px #30d158) drop-shadow(0 0 16px #32d74b);
+}
+
+.led-glow-blue {
+  filter: drop-shadow(0 0 8px #0a84ff) drop-shadow(0 0 16px #007aff);
+}
+
+.led-glow-yellow {
+  filter: drop-shadow(0 0 8px #ffd60a) drop-shadow(0 0 16px #ffcc00);
+}
+
+.led-glow-orange {
+  filter: drop-shadow(0 0 8px #ff9f0a) drop-shadow(0 0 16px #ff9500);
+}
+
