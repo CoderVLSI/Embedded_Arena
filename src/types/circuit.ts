@@ -1,6 +1,10 @@
 export type ComponentType =
   | 'wokwi-arduino-uno'
   | 'wokwi-esp32-devkit-v1'
+  | 'wokwi-esp32-s3'
+  | 'wokwi-esp32-c3'
+  | 'wokwi-esp32-c6'
+  | 'wokwi-seeed-xiao'
   | 'wokwi-pi-pico'
   | 'wokwi-stm32-bluepill'
   | 'wokwi-esp8266-nodemcu'

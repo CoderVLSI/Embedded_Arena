@@ -1,6 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { CircuitComponent, WireConnection, ComponentType } from '../../types/circuit';
 import { Esp32DevKit } from '../parts/Esp32DevKit';
+import { Esp32S3 } from '../parts/Esp32S3';
+import { Esp32C3 } from '../parts/Esp32C3';
+import { Esp32C6 } from '../parts/Esp32C6';
+import { SeeedXiao } from '../parts/SeeedXiao';
 import { ArduinoUno } from '../parts/ArduinoUno';
 import { RaspberryPiPico } from '../parts/RaspberryPiPico';
 import { Stm32BluePill } from '../parts/Stm32BluePill';
@@ -194,6 +198,42 @@ export const CircuitCanvas: React.FC<Props> = ({
       case 'wokwi-esp32-devkit-v1':
         innerElement = (
           <Esp32DevKit
+            component={comp}
+            onPinClick={(p, e) => handlePinClick(comp.id, p, e)}
+            selectedPin={activeWireStart ? `${activeWireStart.compId}:${activeWireStart.pinId}` : null}
+          />
+        );
+        break;
+      case 'wokwi-esp32-s3':
+        innerElement = (
+          <Esp32S3
+            component={comp}
+            onPinClick={(p, e) => handlePinClick(comp.id, p, e)}
+            selectedPin={activeWireStart ? `${activeWireStart.compId}:${activeWireStart.pinId}` : null}
+          />
+        );
+        break;
+      case 'wokwi-esp32-c3':
+        innerElement = (
+          <Esp32C3
+            component={comp}
+            onPinClick={(p, e) => handlePinClick(comp.id, p, e)}
+            selectedPin={activeWireStart ? `${activeWireStart.compId}:${activeWireStart.pinId}` : null}
+          />
+        );
+        break;
+      case 'wokwi-esp32-c6':
+        innerElement = (
+          <Esp32C6
+            component={comp}
+            onPinClick={(p, e) => handlePinClick(comp.id, p, e)}
+            selectedPin={activeWireStart ? `${activeWireStart.compId}:${activeWireStart.pinId}` : null}
+          />
+        );
+        break;
+      case 'wokwi-seeed-xiao':
+        innerElement = (
+          <SeeedXiao
             component={comp}
             onPinClick={(p, e) => handlePinClick(comp.id, p, e)}
             selectedPin={activeWireStart ? `${activeWireStart.compId}:${activeWireStart.pinId}` : null}

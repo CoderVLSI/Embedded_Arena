@@ -38,6 +38,122 @@ export function getComponentPins(type: ComponentType): PinDefinition[] {
         { id: 'A5', name: 'A5/SCL', x: 256, y: 225, type: 'analog' },
       ];
 
+    case 'wokwi-esp32-s3':
+      return [
+        // Left Pins
+        { id: '3V3', name: '3V3', x: 12, y: 35, type: 'power' },
+        { id: 'EN', name: 'EN', x: 12, y: 48, type: 'passive' },
+        { id: '4', name: 'IO4', x: 12, y: 61, type: 'digital' },
+        { id: '5', name: 'IO5', x: 12, y: 74, type: 'digital' },
+        { id: '6', name: 'IO6', x: 12, y: 87, type: 'digital' },
+        { id: '7', name: 'IO7', x: 12, y: 100, type: 'digital' },
+        { id: '15', name: 'IO15', x: 12, y: 113, type: 'digital' },
+        { id: '16', name: 'IO16', x: 12, y: 126, type: 'digital' },
+        { id: '17', name: 'IO17', x: 12, y: 139, type: 'digital' },
+        { id: '18', name: 'IO18', x: 12, y: 152, type: 'digital' },
+        { id: '8', name: 'IO8/SDA', x: 12, y: 165, type: 'digital' },
+        { id: '9', name: 'IO9/SCL', x: 12, y: 178, type: 'digital' },
+        { id: '10', name: 'IO10', x: 12, y: 191, type: 'digital' },
+        { id: '11', name: 'IO11', x: 12, y: 204, type: 'digital' },
+        { id: '12', name: 'IO12', x: 12, y: 217, type: 'digital' },
+        { id: '13', name: 'IO13', x: 12, y: 230, type: 'digital' },
+        { id: '14', name: 'IO14', x: 12, y: 243, type: 'digital' },
+        { id: 'GND.1', name: 'GND', x: 12, y: 256, type: 'ground' },
+        // Right Pins
+        { id: '5V', name: '5V', x: 108, y: 35, type: 'power' },
+        { id: 'GND.2', name: 'GND', x: 108, y: 48, type: 'ground' },
+        { id: '1', name: 'IO1', x: 108, y: 61, type: 'digital' },
+        { id: '2', name: 'IO2', x: 108, y: 74, type: 'digital' },
+        { id: '3', name: 'IO3', x: 108, y: 87, type: 'digital' },
+        { id: '43', name: 'TX/43', x: 108, y: 100, type: 'digital' },
+        { id: '44', name: 'RX/44', x: 108, y: 113, type: 'digital' },
+        { id: '21', name: 'IO21', x: 108, y: 126, type: 'digital' },
+        { id: '47', name: 'IO47', x: 108, y: 139, type: 'digital' },
+        { id: '48', name: 'RGB/48', x: 108, y: 152, type: 'digital' },
+        { id: '45', name: 'IO45', x: 108, y: 165, type: 'digital' },
+        { id: '0', name: 'IO0/BOOT', x: 108, y: 178, type: 'digital' },
+        { id: '35', name: 'IO35', x: 108, y: 191, type: 'digital' },
+        { id: '36', name: 'IO36', x: 108, y: 204, type: 'digital' },
+        { id: '37', name: 'IO37', x: 108, y: 217, type: 'digital' },
+        { id: '38', name: 'IO38', x: 108, y: 230, type: 'digital' },
+        { id: '39', name: 'IO39', x: 108, y: 243, type: 'digital' },
+        { id: '40', name: 'IO40', x: 108, y: 256, type: 'digital' },
+      ];
+
+    case 'wokwi-esp32-c3':
+      return [
+        // Left Pins
+        { id: '3V3', name: '3V3', x: 12, y: 40, type: 'power' },
+        { id: 'EN', name: 'EN', x: 12, y: 56, type: 'passive' },
+        { id: '4', name: 'IO4/ADC4', x: 12, y: 72, type: 'analog' },
+        { id: '5', name: 'IO5/ADC5', x: 12, y: 88, type: 'analog' },
+        { id: '6', name: 'IO6', x: 12, y: 104, type: 'digital' },
+        { id: '7', name: 'IO7', x: 12, y: 120, type: 'digital' },
+        { id: '8', name: 'IO8/LED', x: 12, y: 136, type: 'digital' },
+        { id: '9', name: 'IO9/BOOT', x: 12, y: 152, type: 'digital' },
+        { id: '10', name: 'IO10', x: 12, y: 168, type: 'digital' },
+        { id: 'GND.1', name: 'GND', x: 12, y: 184, type: 'ground' },
+        // Right Pins
+        { id: '5V', name: '5V', x: 98, y: 40, type: 'power' },
+        { id: 'GND.2', name: 'GND', x: 98, y: 56, type: 'ground' },
+        { id: '0', name: 'IO0/ADC0', x: 98, y: 72, type: 'analog' },
+        { id: '1', name: 'IO1/ADC1', x: 98, y: 88, type: 'analog' },
+        { id: '2', name: 'IO2/ADC2', x: 98, y: 104, type: 'analog' },
+        { id: '3', name: 'IO3/ADC3', x: 98, y: 120, type: 'analog' },
+        { id: '20', name: 'IO20/RX', x: 98, y: 136, type: 'digital' },
+        { id: '21', name: 'IO21/TX', x: 98, y: 152, type: 'digital' },
+        { id: '18', name: 'IO18/D-', x: 98, y: 168, type: 'digital' },
+        { id: '19', name: 'IO19/D+', x: 98, y: 184, type: 'digital' },
+      ];
+
+    case 'wokwi-esp32-c6':
+      return [
+        // Left Pins
+        { id: '3V3', name: '3V3', x: 12, y: 40, type: 'power' },
+        { id: 'EN', name: 'EN', x: 12, y: 56, type: 'passive' },
+        { id: '0', name: 'IO0/ADC0', x: 12, y: 72, type: 'analog' },
+        { id: '1', name: 'IO1/ADC1', x: 12, y: 88, type: 'analog' },
+        { id: '2', name: 'IO2/ADC2', x: 12, y: 104, type: 'analog' },
+        { id: '3', name: 'IO3/ADC3', x: 12, y: 120, type: 'analog' },
+        { id: '4', name: 'IO4/ADC4', x: 12, y: 136, type: 'analog' },
+        { id: '5', name: 'IO5/ADC5', x: 12, y: 152, type: 'analog' },
+        { id: '6', name: 'IO6/SDA', x: 12, y: 168, type: 'digital' },
+        { id: '7', name: 'IO7/SCL', x: 12, y: 184, type: 'digital' },
+        { id: 'GND.1', name: 'GND', x: 12, y: 200, type: 'ground' },
+        // Right Pins
+        { id: '5V', name: '5V', x: 98, y: 40, type: 'power' },
+        { id: 'GND.2', name: 'GND', x: 98, y: 56, type: 'ground' },
+        { id: '8', name: 'IO8/RGB', x: 98, y: 72, type: 'digital' },
+        { id: '9', name: 'IO9/BOOT', x: 98, y: 88, type: 'digital' },
+        { id: '14', name: 'IO14', x: 98, y: 104, type: 'digital' },
+        { id: '15', name: 'IO15', x: 98, y: 120, type: 'digital' },
+        { id: '16', name: 'IO16/RX', x: 98, y: 136, type: 'digital' },
+        { id: '17', name: 'IO17/TX', x: 98, y: 152, type: 'digital' },
+        { id: '18', name: 'IO18/SDO', x: 98, y: 168, type: 'digital' },
+        { id: '19', name: 'IO19/SDI', x: 98, y: 184, type: 'digital' },
+        { id: '20', name: 'IO20/SCK', x: 98, y: 200, type: 'digital' },
+      ];
+
+    case 'wokwi-seeed-xiao':
+      return [
+        // Left Pins (D0 to D6)
+        { id: 'D0', name: 'D0/A0', x: 8, y: 25, type: 'analog' },
+        { id: 'D1', name: 'D1/A1', x: 8, y: 40, type: 'analog' },
+        { id: 'D2', name: 'D2/A2', x: 8, y: 55, type: 'analog' },
+        { id: 'D3', name: 'D3/A3', x: 8, y: 70, type: 'analog' },
+        { id: 'D4', name: 'D4/SDA', x: 8, y: 85, type: 'digital' },
+        { id: 'D5', name: 'D5/SCL', x: 8, y: 100, type: 'digital' },
+        { id: 'D6', name: 'D6/TX', x: 8, y: 115, type: 'digital' },
+        // Right Pins (D7 to 3V3)
+        { id: '5V', name: '5V', x: 72, y: 25, type: 'power' },
+        { id: 'GND', name: 'GND', x: 72, y: 40, type: 'ground' },
+        { id: '3V3', name: '3V3', x: 72, y: 55, type: 'power' },
+        { id: 'D10', name: 'D10/MOSI', x: 72, y: 70, type: 'digital' },
+        { id: 'D9', name: 'D9/MISO', x: 72, y: 85, type: 'digital' },
+        { id: 'D8', name: 'D8/SCK', x: 72, y: 100, type: 'digital' },
+        { id: 'D7', name: 'D7/RX', x: 72, y: 115, type: 'digital' },
+      ];
+
     case 'wokwi-esp32-devkit-v1':
       return [
         // Left Pin Header (Top to Bottom)

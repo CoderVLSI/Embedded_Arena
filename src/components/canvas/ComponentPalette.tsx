@@ -29,13 +29,54 @@ function ComponentThumbnail({ type, attrs }: { type: ComponentType; attrs?: Reco
           <rect x="14" y="18" width="20" height="14" rx="2" fill="#9ca3af" stroke="#4b5563" strokeWidth="0.8" />
           <text x="24" y="28" fill="#1f2937" fontSize="5" fontWeight="bold" textAnchor="middle">ESP32</text>
           <rect x="18" y="40" width="12" height="6" rx="1" fill="#9ca3af" stroke="#4b5563" strokeWidth="0.8" />
-          {/* Pin rows */}
-          {[10, 16, 22, 28, 34].map((y) => (
-            <g key={y}>
-              <circle cx="8" cy={y} r="1.5" fill="#fbbf24" />
-              <circle cx="40" cy={y} r="1.5" fill="#fbbf24" />
-            </g>
-          ))}
+        </svg>
+      );
+
+    case 'wokwi-esp32-s3':
+      return (
+        <svg width={size} height={size} viewBox="0 0 48 48">
+          <rect x="9" y="2" width="30" height="44" rx="3" fill="#111827" stroke="#374151" strokeWidth="1.2" />
+          <rect x="13" y="6" width="22" height="14" rx="2" fill="#9ca3af" stroke="#4b5563" strokeWidth="0.8" />
+          <text x="24" y="15" fill="#111827" fontSize="4.5" fontWeight="bold" textAnchor="middle">ESP32-S3</text>
+          <circle cx="24" cy="27" r="2.5" fill="#22c55e" />
+          <text x="24" y="36" fill="#f8fafc" fontSize="4" fontWeight="bold" textAnchor="middle">AI Vector</text>
+          <rect x="13" y="42" width="9" height="4" rx="0.5" fill="#cbd5e1" />
+          <rect x="26" y="42" width="9" height="4" rx="0.5" fill="#cbd5e1" />
+        </svg>
+      );
+
+    case 'wokwi-esp32-c3':
+      return (
+        <svg width={size} height={size} viewBox="0 0 48 48">
+          <rect x="10" y="3" width="28" height="42" rx="3" fill="#18181b" stroke="#3f3f46" strokeWidth="1.2" />
+          <rect x="14" y="6" width="20" height="12" rx="1" fill="#9ca3af" />
+          <text x="24" y="14" fill="#111827" fontSize="4" fontWeight="bold" textAnchor="middle">C3 RISC-V</text>
+          <circle cx="24" cy="24" r="2.5" fill="#38bdf8" />
+          <text x="24" y="34" fill="#7dd3fc" fontSize="4" textAnchor="middle">160MHz</text>
+          <rect x="18" y="41" width="12" height="4" rx="1" fill="#cbd5e1" />
+        </svg>
+      );
+
+    case 'wokwi-esp32-c6':
+      return (
+        <svg width={size} height={size} viewBox="0 0 48 48">
+          <rect x="10" y="3" width="28" height="42" rx="3" fill="#0f172a" stroke="#1e3a8a" strokeWidth="1.2" />
+          <rect x="14" y="6" width="20" height="12" rx="1" fill="#9ca3af" />
+          <text x="24" y="14" fill="#111827" fontSize="4" fontWeight="bold" textAnchor="middle">C6 WiFi6</text>
+          <circle cx="24" cy="24" r="2.5" fill="#ec4899" />
+          <text x="24" y="34" fill="#f472b6" fontSize="4" textAnchor="middle">Thread</text>
+          <rect x="18" y="41" width="12" height="4" rx="1" fill="#cbd5e1" />
+        </svg>
+      );
+
+    case 'wokwi-seeed-xiao':
+      return (
+        <svg width={size} height={size} viewBox="0 0 48 48">
+          <rect x="12" y="8" width="24" height="32" rx="2" fill="#09090b" stroke="#27272a" strokeWidth="1" />
+          <rect x="18" y="5" width="12" height="5" rx="1" fill="#cbd5e1" />
+          <rect x="15" y="15" width="18" height="12" rx="1" fill="#9ca3af" />
+          <text x="24" y="23" fill="#09090b" fontSize="4" fontWeight="bold" textAnchor="middle">XIAO</text>
+          <text x="24" y="36" fill="#22c55e" fontSize="3.5" fontWeight="bold" textAnchor="middle">Seeed</text>
         </svg>
       );
 
@@ -328,6 +369,10 @@ function ComponentThumbnail({ type, attrs }: { type: ComponentType; attrs?: Reco
 const ITEMS: PaletteItem[] = [
   { type: 'wokwi-arduino-uno', name: 'Arduino Uno R3', category: 'MCU', description: 'Classic ATmega328P microcontroller board' },
   { type: 'wokwi-esp32-devkit-v1', name: 'ESP32 DevKit v1', category: 'MCU', description: 'Dual-core WiFi & Bluetooth IoT microcontroller' },
+  { type: 'wokwi-esp32-s3', name: 'ESP32-S3 DevKit', category: 'MCU', description: 'Dual-core Xtensa LX7 with AI vector instructions & dual USB-C' },
+  { type: 'wokwi-esp32-c3', name: 'ESP32-C3 DevKit', category: 'MCU', description: '32-bit RISC-V 160MHz single-core WiFi + BLE 5.0' },
+  { type: 'wokwi-esp32-c6', name: 'ESP32-C6 DevKit', category: 'MCU', description: 'RISC-V WiFi 6, 802.15.4 Zigbee, Thread & BLE 5.0' },
+  { type: 'wokwi-seeed-xiao', name: 'Seeed Studio XIAO', category: 'MCU', description: 'Thumb-sized ultra-compact ESP32-C3 / RP2040 board' },
   { type: 'wokwi-pi-pico', name: 'Raspberry Pi Pico', category: 'MCU', description: 'RP2040 Dual ARM Cortex-M0+ 133MHz board' },
   { type: 'wokwi-stm32-bluepill', name: 'STM32 Blue Pill', category: 'MCU', description: 'STM32F103C8T6 ARM Cortex-M3 72MHz board' },
   { type: 'wokwi-esp8266-nodemcu', name: 'ESP8266 NodeMCU', category: 'MCU', description: 'WiFi IoT microcontroller development board' },
