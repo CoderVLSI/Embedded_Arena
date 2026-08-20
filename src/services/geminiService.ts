@@ -1,4 +1,4 @@
-﻿import { CircuitComponent, WireConnection } from '../types/circuit';
+import { CircuitComponent, WireConnection } from '../types/circuit';
 
 export interface AiProjectDesign {
   title: string;
@@ -91,6 +91,145 @@ Respond ONLY with valid, raw JSON (no markdown fences, no backticks, just pure J
 
   // Smart Embedded AI Circuit Synthesizer (Instant local generator)
   return synthesizeCircuitLocally(cleanPrompt);
+}
+
+export interface AiGuidedLab {
+  id: string;
+  title: string;
+  category: 'Fundamentals' | 'Analog & Power' | 'Protocols' | 'IoT' | 'Robotics';
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  description: string;
+  learningObjectives: string[];
+  steps: {
+    title: string;
+    instruction: string;
+    hint?: string;
+  }[];
+  circuit: {
+    components: CircuitComponent[];
+    wires: WireConnection[];
+    inoCode: string;
+    libraries: string[];
+  };
+}
+
+export async function generateGuidedLabWithGemini(
+  labTopic: string,
+  apiKey?: string
+): Promise<AiGuidedLab> {
+  const cleanTopic = labTopic.trim();
+
+  if (apiKey && apiKey.trim().length > 5) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `You are an expert college engineering professor and embedded systems instructor.
+Create a structured step-by-step laboratory experiment for this topic: "${cleanTopic}".
+
+Available components: wokwi-arduino-uno, wokwi-esp32-devkit-v1, wokwi-esp32-s3, wokwi-esp32-c3, wokwi-pi-pico, wokwi-stm32-bluepill, wokwi-led, wokwi-resistor, wokwi-pushbutton, wokwi-potentiometer, wokwi-lcd1602, wokwi-servo, wokwi-buzzer, wokwi-dht22, wokwi-hc-sr04, wokwi-relay-module.
+
+Respond ONLY with valid, raw JSON (no markdown fences) matching this schema:
+{
+  "id": "ai-lab-custom",
+  "title": "Lab: Title",
+  "category": "Fundamentals" | "Analog & Power" | "Protocols" | "IoT" | "Robotics",
+  "difficulty": "Beginner" | "Intermediate" | "Advanced",
+  "description": "2-3 sentence overview of this experiment.",
+  "learningObjectives": ["Objective 1", "Objective 2", "Objective 3"],
+  "steps": [
+    { "title": "Step 1: Place Board", "instruction": "Add microcontroller...", "hint": "..." },
+    { "title": "Step 2: Connect Sensors", "instruction": "Wire pin X to Y...", "hint": "..." },
+    { "title": "Step 3: Setup Code", "instruction": "Configure...", "hint": "..." },
+    { "title": "Step 4: Execute & Observe", "instruction": "Click Run...", "hint": "..." }
+  ],
+  "circuit": {
+    "components": [
+      { "id": "mcu", "type": "wokwi-esp32-devkit-v1", "top": 120, "left": 100, "attrs": {} },
+      { "id": "led", "type": "wokwi-led", "top": 120, "left": 360, "attrs": { "color": "green" } }
+    ],
+    "wires": [
+      { "id": "w1", "from": "mcu:2", "to": "led:A", "color": "green" },
+      { "id": "w2", "from": "mcu:GND.1", "to": "led:C", "color": "black" }
+    ],
+    "inoCode": "// full complete Arduino code...",
+    "libraries": []
+  }
+}`
+                  }
+                ]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.2,
+              responseMimeType: 'application/json'
+            }
+          })
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (rawJson) {
+          const parsed = JSON.parse(rawJson);
+          return parsed;
+        }
+      }
+    } catch (err) {
+      console.warn('Gemini Guided Lab API failed, using synthesizer:', err);
+    }
+  }
+
+  // Local synthesis fallback
+  const baseDesign = synthesizeCircuitLocally(cleanTopic);
+  return {
+    id: `ai-lab-${Date.now()}`,
+    title: baseDesign.title,
+    category: 'IoT',
+    difficulty: 'Intermediate',
+    description: baseDesign.description,
+    learningObjectives: [
+      'Understand sensor & actuator circuit interfacing',
+      'Learn embedded C++ control routines and threshold evaluation',
+      'Analyze real-time simulation signals and telemetry output'
+    ],
+    steps: [
+      {
+        title: 'Step 1: Place Microcontroller Board',
+        instruction: 'Add the microcontroller to your workspace canvas as the core processor.',
+        hint: 'Use the left canvas toolbar.'
+      },
+      {
+        title: 'Step 2: Connect Power Rails & Ground',
+        instruction: 'Connect VCC/3.3V power and GND wires to all sensors and actuators.',
+        hint: 'Standard color code: Red = Power, Black = Ground.'
+      },
+      {
+        title: 'Step 3: Connect Signal & Control GPIOs',
+        instruction: 'Wire the digital/analog signal lines according to the circuit diagram.',
+        hint: 'Click the source pin then click the destination pin.'
+      },
+      {
+        title: 'Step 4: Load C++ Firmware & Execute Simulation',
+        instruction: 'Verify pinMode, read/write routines, and click "▶ Run" in the top bar.',
+        hint: 'Monitor serial logs in the bottom terminal.'
+      }
+    ],
+    circuit: {
+      components: baseDesign.components,
+      wires: baseDesign.wires,
+      inoCode: baseDesign.inoCode,
+      libraries: baseDesign.libraries
+    }
+  };
 }
 
 function synthesizeCircuitLocally(prompt: string): AiProjectDesign {

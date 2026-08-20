@@ -1,8 +1,9 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { CircuitComponent, WireConnection } from '../../types/circuit';
+import { generateGuidedLabWithGemini, AiGuidedLab } from '../../services/geminiService';
 import {
   GraduationCap, CheckCircle2, Circle, ArrowRight, Play, Sparkles,
-  BookOpen, ChevronRight, X, Zap, Award
+  BookOpen, ChevronRight, X, Zap, Award, Plus, Search
 } from 'lucide-react';
 
 export interface GuidedLabExperiment {
@@ -17,6 +18,12 @@ export interface GuidedLabExperiment {
     instruction: string;
     hint?: string;
   }[];
+  customCircuit?: {
+    components: CircuitComponent[];
+    wires: WireConnection[];
+    inoCode: string;
+    libraries: string[];
+  };
 }
 
 export const LAB_EXPERIMENTS: GuidedLabExperiment[] = [
@@ -143,8 +150,12 @@ interface Props {
 }
 
 export const GuidedLabPanel: React.FC<Props> = ({ isOpen, onClose, onLoadLabCircuit }) => {
+  const [labs, setLabs] = useState<GuidedLabExperiment[]>(LAB_EXPERIMENTS);
   const [selectedLab, setSelectedLab] = useState<GuidedLabExperiment>(LAB_EXPERIMENTS[0]);
   const [completedSteps, setCompletedSteps] = useState<Record<string, number[]>>({});
+  const [customTopic, setCustomTopic] = useState('');
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [showAiInput, setShowAiInput] = useState(false);
 
   if (!isOpen) return null;
 
@@ -156,7 +167,47 @@ export const GuidedLabPanel: React.FC<Props> = ({ isOpen, onClose, onLoadLabCirc
     setCompletedSteps({ ...completedSteps, [selectedLab.id]: next });
   };
 
+  const handleGenerateCustomLab = async () => {
+    if (!customTopic.trim()) return;
+    setIsGeneratingAi(true);
+    try {
+      const apiKey = localStorage.getItem('gemini_api_key') || undefined;
+      const aiLab = await generateGuidedLabWithGemini(customTopic, apiKey);
+
+      const newLab: GuidedLabExperiment = {
+        id: aiLab.id,
+        title: `✨ ${aiLab.title}`,
+        category: aiLab.category,
+        difficulty: aiLab.difficulty,
+        description: aiLab.description,
+        learningObjectives: aiLab.learningObjectives,
+        steps: aiLab.steps,
+        customCircuit: aiLab.circuit
+      };
+
+      setLabs([newLab, ...labs]);
+      setSelectedLab(newLab);
+      setShowAiInput(false);
+      setCustomTopic('');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGeneratingAi(false);
+    }
+  };
+
   const handleQuickLoadLab = () => {
+    if (selectedLab.customCircuit) {
+      onLoadLabCircuit(
+        selectedLab.customCircuit.components,
+        selectedLab.customCircuit.wires,
+        selectedLab.customCircuit.inoCode,
+        selectedLab.customCircuit.libraries,
+        selectedLab.title
+      );
+      return;
+    }
+
     if (selectedLab.id === 'lab-1') {
       onLoadLabCircuit(
         [
@@ -324,12 +375,12 @@ void loop() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-white leading-tight">Guided Lab Tutor</h2>
-              <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded">
-                EXPERIMENTS
+              <h2 className="text-sm font-bold text-white leading-tight">Guided AI Lab Tutor</h2>
+              <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded flex items-center gap-1">
+                <Sparkles size={10} /> GEMINI AI
               </span>
             </div>
-            <p className="text-[11px] text-slate-400">Step-by-Step College Engineering Lab</p>
+            <p className="text-[11px] text-slate-400">Powered by Google Gemini API</p>
           </div>
         </div>
 
@@ -341,20 +392,64 @@ void loop() {
         </button>
       </div>
 
-      {/* Lab Experiment Selector Dropdown */}
-      <div className="p-4 bg-[#191924] border-b border-slate-800 space-y-2">
-        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select Experiment</label>
+      {/* Lab Experiment Selector Dropdown & Custom Generator */}
+      <div className="p-4 bg-[#191924] border-b border-slate-800 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select Experiment</label>
+          <button
+            onClick={() => setShowAiInput(!showAiInput)}
+            className="text-[11px] text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold transition"
+          >
+            <Sparkles size={12} />
+            <span>{showAiInput ? 'Close Generator' : '+ AI Custom Lab'}</span>
+          </button>
+        </div>
+
+        {/* Gemini AI Custom Lab Generator Input */}
+        {showAiInput && (
+          <div className="p-3 bg-[#13131a] rounded-xl border border-emerald-500/40 space-y-2 animate-in fade-in duration-150">
+            <label className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1">
+              <Sparkles size={12} /> Ask Gemini to Create Any Lab Experiment
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Ultrasonic Sonar Radar with Servo and LCD telemetry..."
+              value={customTopic}
+              onChange={(e) => setCustomTopic(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleGenerateCustomLab()}
+              className="w-full bg-slate-900 text-white px-3 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500 text-xs"
+            />
+            <button
+              onClick={handleGenerateCustomLab}
+              disabled={isGeneratingAi || !customTopic.trim()}
+              className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-600 to-sky-600 hover:from-emerald-500 hover:to-sky-500 disabled:opacity-50 text-white font-bold text-xs py-1.5 rounded-lg transition shadow"
+            >
+              {isGeneratingAi ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Gemini is creating lab curriculum...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles size={13} />
+                  <span>Generate Lab with Gemini AI</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
         <select
           value={selectedLab.id}
           onChange={(e) => {
-            const found = LAB_EXPERIMENTS.find(l => l.id === e.target.value);
+            const found = labs.find(l => l.id === e.target.value);
             if (found) {
               setSelectedLab(found);
             }
           }}
           className="w-full bg-slate-900 text-white px-3 py-2 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500 text-xs font-semibold"
         >
-          {LAB_EXPERIMENTS.map((exp) => (
+          {labs.map((exp) => (
             <option key={exp.id} value={exp.id}>
               {exp.title} ({exp.difficulty})
             </option>
