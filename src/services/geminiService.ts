@@ -12,13 +12,24 @@ export interface AiProjectDesign {
   modelUsed?: string;
 }
 
-export async function testGeminiApiKey(apiKey: string): Promise<{ success: boolean; message: string; modelUsed?: string }> {
+export const GEMINI_MODELS = [
+  { id: 'gemini-3.7-flash', name: 'Gemini 3.7 Flash (Default / Latest Flagship)' },
+  { id: 'gemini-3.1-pro', name: 'Gemini 3.1 Pro (Deep Complex Reasoning)' },
+  { id: 'gemini-3.6-flash', name: 'Gemini 3.6 Flash (High-Efficiency Agentic)' },
+  { id: 'gemini-3.5-flash-lite', name: 'Gemini 3.5 Flash-Lite (Ultra Fast)' },
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Legacy)' }
+];
+
+export async function testGeminiApiKey(apiKey: string, preferredModel?: string): Promise<{ success: boolean; message: string; modelUsed?: string }> {
   const cleanKey = apiKey.trim();
   if (!cleanKey) {
     return { success: false, message: 'Please enter a valid Google Gemini API Key' };
   }
 
-  const testModels = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-pro'];
+  const testModels = preferredModel
+    ? [preferredModel, 'gemini-3.7-flash', 'gemini-3.1-pro', 'gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-1.5-flash']
+    : ['gemini-3.7-flash', 'gemini-3.1-pro', 'gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash', 'gemini-1.5-flash'];
 
   for (const model of testModels) {
     try {
@@ -52,14 +63,17 @@ export async function testGeminiApiKey(apiKey: string): Promise<{ success: boole
 
 export async function generateProjectWithGemini(
   prompt: string,
-  apiKey?: string
+  apiKey?: string,
+  preferredModel?: string
 ): Promise<AiProjectDesign> {
   const cleanPrompt = prompt.trim();
   const cleanKey = apiKey ? apiKey.trim() : '';
 
-  // If user provided Gemini API Key, attempt live API call with model fallbacks
+  // If user provided Gemini API Key, attempt live API call with latest Gemini 3.x models
   if (cleanKey.length > 5) {
-    const candidateModels = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-pro'];
+    const candidateModels = preferredModel
+      ? [preferredModel, 'gemini-3.7-flash', 'gemini-3.1-pro', 'gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-1.5-flash']
+      : ['gemini-3.7-flash', 'gemini-3.1-pro', 'gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash', 'gemini-1.5-flash'];
 
     for (const model of candidateModels) {
       try {
@@ -170,23 +184,30 @@ export interface AiGuidedLab {
 
 export async function generateGuidedLabWithGemini(
   labTopic: string,
-  apiKey?: string
+  apiKey?: string,
+  preferredModel?: string
 ): Promise<AiGuidedLab> {
   const cleanTopic = labTopic.trim();
+  const cleanKey = apiKey ? apiKey.trim() : '';
 
-  if (apiKey && apiKey.trim().length > 5) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: `You are an expert college engineering professor and embedded systems instructor.
+  if (cleanKey.length > 5) {
+    const candidateModels = preferredModel
+      ? [preferredModel, 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro']
+      : ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-thinking-exp', 'gemini-1.5-pro'];
+
+    for (const model of candidateModels) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cleanKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    {
+                      text: `You are an expert college engineering professor and embedded systems instructor.
 Create a structured step-by-step laboratory experiment for this topic: "${cleanTopic}".
 
 Available components: wokwi-arduino-uno, wokwi-esp32-devkit-v1, wokwi-esp32-s3, wokwi-esp32-c3, wokwi-pi-pico, wokwi-stm32-bluepill, wokwi-led, wokwi-resistor, wokwi-pushbutton, wokwi-potentiometer, wokwi-lcd1602, wokwi-servo, wokwi-buzzer, wokwi-dht22, wokwi-hc-sr04, wokwi-relay-module.
@@ -218,28 +239,32 @@ Respond ONLY with valid, raw JSON (no markdown fences) matching this schema:
     "libraries": []
   }
 }`
-                  }
-                ]
+                    }
+                  ]
+                }
+              ],
+              generationConfig: {
+                temperature: 0.2
               }
-            ],
-            generationConfig: {
-              temperature: 0.2,
-              responseMimeType: 'application/json'
-            }
-          })
-        }
-      );
+            })
+          }
+        );
 
-      if (response.ok) {
-        const data = await response.json();
-        const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (rawJson) {
-          const parsed = JSON.parse(rawJson);
-          return parsed;
+        if (response.ok) {
+          const data = await response.json();
+          let rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (rawJson) {
+            rawJson = rawJson.trim();
+            if (rawJson.startsWith('```')) {
+              rawJson = rawJson.replace(/^```(json)?\n?/, '').replace(/\n?```$/, '').trim();
+            }
+            const parsed = JSON.parse(rawJson);
+            return parsed;
+          }
         }
+      } catch (err) {
+        console.warn(`Guided Lab with ${model} failed, trying next candidate...`, err);
       }
-    } catch (err) {
-      console.warn('Gemini Guided Lab API failed, using synthesizer:', err);
     }
   }
 

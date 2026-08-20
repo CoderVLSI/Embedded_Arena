@@ -1,8 +1,8 @@
-﻿import React, { useState, useEffect } from 'react';
-import { generateProjectWithGemini, testGeminiApiKey, AiProjectDesign } from '../../services/geminiService';
+import React, { useState, useEffect } from 'react';
+import { generateProjectWithGemini, testGeminiApiKey, GEMINI_MODELS, AiProjectDesign } from '../../services/geminiService';
 import {
   Sparkles, Key, ArrowRight, Check, Play, Cpu, Layers, Code, Zap, X,
-  ChevronRight, CheckCircle2, AlertCircle, RefreshCw, Eye, EyeOff, Save
+  ChevronRight, CheckCircle2, AlertCircle, RefreshCw, Eye, EyeOff, Save, Sliders
 } from 'lucide-react';
 
 interface Props {
@@ -22,6 +22,7 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
   const [prompt, setPrompt] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [tempApiKey, setTempApiKey] = useState('');
+  const [selectedModel, setSelectedModel] = useState('gemini-3.7-flash');
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [showKeyPassword, setShowKeyPassword] = useState(false);
   const [isTestingKey, setIsTestingKey] = useState(false);
@@ -35,14 +36,18 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
   const [applied, setApplied] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('gemini_api_key');
-    if (saved) {
-      setApiKey(saved);
-      setTempApiKey(saved);
+    const savedKey = localStorage.getItem('gemini_api_key');
+    const savedModel = localStorage.getItem('gemini_selected_model');
+    if (savedKey) {
+      setApiKey(savedKey);
+      setTempApiKey(savedKey);
       setKeyStatus({
         type: 'success',
-        message: 'API Key loaded from local storage.',
+        message: 'API Key active from browser storage.',
       });
+    }
+    if (savedModel) {
+      setSelectedModel(savedModel);
     }
   }, []);
 
@@ -59,14 +64,15 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
     }
 
     setIsTestingKey(true);
-    setKeyStatus({ type: 'idle', message: 'Testing connection to Google Gemini API...' });
+    setKeyStatus({ type: 'idle', message: `Testing connection with ${selectedModel}...` });
 
-    const result = await testGeminiApiKey(clean);
+    const result = await testGeminiApiKey(clean, selectedModel);
     setIsTestingKey(false);
 
     if (result.success) {
       setApiKey(clean);
       localStorage.setItem('gemini_api_key', clean);
+      localStorage.setItem('gemini_selected_model', selectedModel);
       setKeyStatus({
         type: 'success',
         message: `✓ ${result.message}`,
@@ -87,7 +93,7 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
     setApplied(false);
     try {
       const activeKey = apiKey || tempApiKey;
-      const design = await generateProjectWithGemini(p, activeKey);
+      const design = await generateProjectWithGemini(p, activeKey, selectedModel);
       setGeneratedDesign(design);
     } catch (err) {
       console.error(err);
@@ -134,10 +140,10 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
                 ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-400 hover:bg-emerald-900/50'
                 : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
-            title="Configure Gemini API Key"
+            title="Configure Gemini API Key & Model"
           >
             <Key size={13} />
-            <span className="font-semibold">{apiKey ? 'Key Set' : 'Set Key'}</span>
+            <span className="font-semibold">{apiKey ? 'Config' : 'Set Key'}</span>
           </button>
           <button
             onClick={onClose}
@@ -148,9 +154,9 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
         </div>
       </div>
 
-      {/* Gemini API Key Configuration Drawer */}
+      {/* Gemini API Key & Model Selector Configuration Drawer */}
       {showKeyInput && (
-        <div className="p-4 bg-[#191924] border-b border-slate-800 space-y-2.5 text-xs animate-in fade-in duration-150">
+        <div className="p-4 bg-[#191924] border-b border-slate-800 space-y-3 text-xs animate-in fade-in duration-150">
           <div className="flex items-center justify-between">
             <span className="font-bold text-slate-200 flex items-center gap-1.5">
               <Key size={14} className="text-sky-400" /> Google Gemini API Key
@@ -186,22 +192,43 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
             </button>
           </div>
 
-          {/* Save & Confirm Action Buttons */}
-          <div className="flex items-center gap-2">
+          {/* Model Selector Dropdown */}
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+              <Sliders size={11} className="text-sky-400" /> Gemini Model Version:
+            </label>
+            <select
+              value={selectedModel}
+              onChange={(e) => {
+                setSelectedModel(e.target.value);
+                localStorage.setItem('gemini_selected_model', e.target.value);
+              }}
+              className="w-full bg-slate-900 text-white px-3 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-sky-500 font-semibold text-xs"
+            >
+              {GEMINI_MODELS.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Save & Confirm Action Button */}
+          <div className="flex items-center gap-2 pt-1">
             <button
               onClick={handleSaveAndTestKey}
               disabled={isTestingKey}
-              className="flex-1 flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition shadow active:scale-95"
+              className="flex-1 flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white font-bold py-2 px-3 rounded-lg text-xs transition shadow active:scale-95"
             >
               {isTestingKey ? (
                 <>
                   <RefreshCw size={13} className="animate-spin" />
-                  <span>Verifying Key with Gemini...</span>
+                  <span>Testing with {selectedModel}...</span>
                 </>
               ) : (
                 <>
                   <Save size={13} />
-                  <span>Save & Verify Key</span>
+                  <span>Save & Test Connection</span>
                 </>
               )}
             </button>
@@ -228,10 +255,6 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
               <span className="leading-snug">{keyStatus.message}</span>
             </div>
           )}
-
-          <p className="text-[10px] text-slate-400">
-            Stored only in your browser. If left empty, the built-in offline smart synthesizer will be used.
-          </p>
         </div>
       )}
 
@@ -278,7 +301,7 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
             {isGenerating ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Synthesizing with Gemini AI...</span>
+                <span>Synthesizing with {selectedModel}...</span>
               </>
             ) : (
               <>
