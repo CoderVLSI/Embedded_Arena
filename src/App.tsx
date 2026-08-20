@@ -12,7 +12,9 @@ import { ComponentPalette } from './components/canvas/ComponentPalette';
 import { TerminalPanel } from './components/terminal/TerminalPanel';
 import { DocsModal } from './components/docs/DocsModal';
 import { AiAssistantPanel } from './components/ai/AiAssistantPanel';
+import { GuidedLabPanel } from './components/guided/GuidedLabPanel';
 import { AiProjectDesign } from './services/geminiService';
+import { autoLayoutCircuit, findNextAutoPlaceCoordinate } from './utils/autoLayout';
 
 const defaultProject = STARTER_PROJECTS[0];
 
@@ -68,10 +70,12 @@ const App: React.FC = () => {
   const [serialLogs, setSerialLogs] = useState<SerialLogMessage[]>([]);
   const [baudRate, setBaudRate] = useState(9600);
 
-  // Component palette, Docs & AI Assistant modals
+  // Component palette, Docs, Guided Lab & AI Assistant modals
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
+  const [guidedLabOpen, setGuidedLabOpen] = useState(false);
+  const [autoPlaceMode, setAutoPlaceMode] = useState(true);
 
   // Pin manager & runtime (persistent refs)
   const pinManagerRef = useRef(new PinManager());
@@ -92,7 +96,7 @@ const App: React.FC = () => {
     runtimeRef.current.pause();
   }, []);
 
-  // ---------- AI PROJECT DESIGN HANDLER ----------
+  // ---------- AI & GUIDED LAB DESIGN HANDLERS ----------
   const handleApplyAiDesign = useCallback((design: AiProjectDesign) => {
     handleStop();
     setComponents(design.components);
@@ -104,6 +108,28 @@ const App: React.FC = () => {
     i2cBus.resetAll();
     pinManagerRef.current.reset();
   }, [handleStop]);
+
+  const handleLoadLabCircuit = useCallback((
+    labComponents: CircuitComponent[],
+    labWires: WireConnection[],
+    labCode: string,
+    labLibs: string[],
+    labTitle: string
+  ) => {
+    handleStop();
+    setComponents(labComponents);
+    setWires(labWires);
+    setInoCode(labCode);
+    setLibraries(labLibs);
+    setProjectName(labTitle);
+    setSerialLogs([]);
+    i2cBus.resetAll();
+    pinManagerRef.current.reset();
+  }, [handleStop]);
+
+  const handleAutoLayout = useCallback(() => {
+    setComponents((prev) => autoLayoutCircuit(prev, wires));
+  }, [wires]);
 
   const handlePlay = useCallback(() => {
     const pm = pinManagerRef.current;
@@ -152,15 +178,19 @@ const App: React.FC = () => {
 
   const handleAddComponent = useCallback((type: ComponentType, attrs?: Record<string, any>) => {
     const id = type.replace('wokwi-', '').replace(/-/g, '') + '_' + Math.random().toString(36).substring(2, 6);
+    const pos = autoPlaceMode
+      ? findNextAutoPlaceCoordinate(components)
+      : { top: 200 + Math.random() * 80, left: 300 + Math.random() * 120 };
+
     const newComp: CircuitComponent = {
       id,
       type,
-      top: 200 + Math.random() * 100,
-      left: 300 + Math.random() * 150,
+      top: pos.top,
+      left: pos.left,
       attrs: attrs || {},
     };
     setComponents((prev) => [...prev, newComp]);
-  }, []);
+  }, [autoPlaceMode, components]);
 
   // ---------- PROJECT LOAD / EXPORT ----------
   const handleLoadProject = useCallback((project: ProjectFile) => {
@@ -214,6 +244,7 @@ const App: React.FC = () => {
         onExportProject={handleExportProject}
         onOpenDocs={() => setDocsOpen(true)}
         onOpenAiAssistant={() => setAiOpen(true)}
+        onOpenGuidedLab={() => setGuidedLabOpen(true)}
         projectName={projectName}
       />
 
@@ -248,6 +279,9 @@ const App: React.FC = () => {
               onDeleteWire={handleDeleteWire}
               onDeleteComponent={handleDeleteComponent}
               onOpenAddPalette={() => setPaletteOpen(true)}
+              onAutoLayout={handleAutoLayout}
+              autoPlaceMode={autoPlaceMode}
+              onToggleAutoPlaceMode={() => setAutoPlaceMode(!autoPlaceMode)}
             />
           </div>
 
@@ -281,6 +315,13 @@ const App: React.FC = () => {
         isOpen={aiOpen}
         onClose={() => setAiOpen(false)}
         onApplyProject={handleApplyAiDesign}
+      />
+
+      {/* Guided AI Learning Lab Tutor */}
+      <GuidedLabPanel
+        isOpen={guidedLabOpen}
+        onClose={() => setGuidedLabOpen(false)}
+        onLoadLabCircuit={handleLoadLabCircuit}
       />
     </div>
   );

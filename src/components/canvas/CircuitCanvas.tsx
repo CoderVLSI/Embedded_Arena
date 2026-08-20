@@ -26,7 +26,7 @@ import { WireRenderer } from './WireRenderer';
 import { getComponentPins } from './PinDefinitionRegistry';
 import { PinManager } from '../../engine/pinManager';
 import { WIRE_COLORS, Point } from '../../utils/wireRouting';
-import { ZoomIn, ZoomOut, Maximize, Trash2, Palette } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize, Trash2, Palette, Wand2, Grid } from 'lucide-react';
 
 interface Props {
   components: CircuitComponent[];
@@ -38,6 +38,9 @@ interface Props {
   onDeleteWire: (wireId: string) => void;
   onDeleteComponent: (id: string) => void;
   onOpenAddPalette?: () => void;
+  onAutoLayout?: () => void;
+  autoPlaceMode?: boolean;
+  onToggleAutoPlaceMode?: () => void;
 }
 
 export const CircuitCanvas: React.FC<Props> = ({
@@ -50,6 +53,9 @@ export const CircuitCanvas: React.FC<Props> = ({
   onDeleteWire,
   onDeleteComponent,
   onOpenAddPalette,
+  onAutoLayout,
+  autoPlaceMode,
+  onToggleAutoPlaceMode,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -469,6 +475,34 @@ export const CircuitCanvas: React.FC<Props> = ({
         >
           <span className="text-base leading-none font-bold">+</span> Add Part
         </button>
+
+        {/* Auto-Layout Button */}
+        {onAutoLayout && (
+          <button
+            onClick={onAutoLayout}
+            className="flex items-center gap-1.5 bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700/80 text-xs font-medium px-2.5 py-1.5 rounded-lg shadow-lg backdrop-blur transition hover:scale-105 active:scale-95"
+            title="Auto-organize components on breadboard"
+          >
+            <Wand2 size={13} className="text-purple-400" />
+            <span>Auto-Layout</span>
+          </button>
+        )}
+
+        {/* Auto-Place Mode Toggle */}
+        {onToggleAutoPlaceMode && (
+          <button
+            onClick={onToggleAutoPlaceMode}
+            className={`flex items-center gap-1.5 border text-xs font-medium px-2.5 py-1.5 rounded-lg shadow-lg backdrop-blur transition ${
+              autoPlaceMode
+                ? 'bg-emerald-950/90 border-emerald-500 text-emerald-300'
+                : 'bg-slate-900/90 border-slate-700/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+            }`}
+            title="Automatically place new components in optimal open spots"
+          >
+            <Grid size={13} className={autoPlaceMode ? 'text-emerald-400' : 'text-slate-400'} />
+            <span>Auto-Place: {autoPlaceMode ? 'ON' : 'OFF'}</span>
+          </button>
+        )}
 
         {activeWireStart && (
           <div className="bg-sky-950/90 border border-sky-500 text-sky-200 text-xs px-3 py-1 rounded-lg flex items-center gap-2 shadow-lg backdrop-blur animate-pulse">

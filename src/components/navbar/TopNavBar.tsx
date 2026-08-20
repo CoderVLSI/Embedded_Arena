@@ -4,7 +4,7 @@ import { ProjectFile } from '../../types/circuit';
 import { SimulationState } from '../../types/simulation';
 import {
   Play, Pause, Square, Plus, FolderOpen, Download,
-  BookOpen, ChevronDown, Zap, ExternalLink, Heart, Share2, Sparkles
+  BookOpen, ChevronDown, Zap, ExternalLink, Heart, Share2, Sparkles, GraduationCap
 } from 'lucide-react';
 
 interface Props {
@@ -17,6 +17,7 @@ interface Props {
   onExportProject: () => void;
   onOpenDocs: () => void;
   onOpenAiAssistant?: () => void;
+  onOpenGuidedLab?: () => void;
   projectName: string;
 }
 
@@ -30,6 +31,7 @@ export const TopNavBar: React.FC<Props> = ({
   onExportProject,
   onOpenDocs,
   onOpenAiAssistant,
+  onOpenGuidedLab,
   projectName,
 }) => {
   const [showExamples, setShowExamples] = useState(false);
@@ -148,6 +150,16 @@ export const TopNavBar: React.FC<Props> = ({
             </div>
           )}
         </div>
+
+        {/* Guided AI Lab Tutor Button */}
+        <button
+          onClick={onOpenGuidedLab}
+          className="flex items-center gap-1.5 bg-[#1f2937] hover:bg-[#374151] text-emerald-300 border border-emerald-500/40 px-2.5 py-1 rounded text-xs font-semibold transition shadow hover:scale-105 active:scale-95"
+          title="Open Step-by-Step Guided Lab Mode"
+        >
+          <GraduationCap size={14} className="text-emerald-400" />
+          <span>Guided Lab</span>
+        </button>
 
         {/* AI Circuit Assistant (Beta) Button */}
         <button
