@@ -2,7 +2,7 @@
 import { CircuitComponent, WireConnection } from '../../types/circuit';
 import {
   GraduationCap, CheckCircle2, Circle, ArrowRight, Play, Sparkles,
-  BookOpen, HelpCircle, ChevronDown, ChevronRight, X, Zap, Award
+  BookOpen, ChevronRight, X, Zap, Award
 } from 'lucide-react';
 
 export interface GuidedLabExperiment {
@@ -15,10 +15,8 @@ export interface GuidedLabExperiment {
   steps: {
     title: string;
     instruction: string;
-    circuitAction?: () => { components: CircuitComponent[]; wires: WireConnection[]; inoCode: string; libraries: string[] };
     hint?: string;
   }[];
-  vivaQuestions: { q: string; a: string }[];
 }
 
 export const LAB_EXPERIMENTS: GuidedLabExperiment[] = [
@@ -52,16 +50,6 @@ export const LAB_EXPERIMENTS: GuidedLabExperiment[] = [
         title: 'Step 4: Run Simulation & Observe Onboard "L" LED',
         instruction: 'Click "▶ Run" in the top navigation bar. Observe the LED glow animation and the synchronized pin 13 status.'
       }
-    ],
-    vivaQuestions: [
-      {
-        q: 'Why do we need a resistor in series with an LED?',
-        a: 'LEDs have very low internal resistance. Without a series resistor, excessive current flows (I = V/R), destroying the microcontroller pin or the LED.'
-      },
-      {
-        q: 'What is the voltage output of an Arduino Uno pin in HIGH state?',
-        a: '5.0 Volts DC (or 3.3V on an ESP32/Pico/STM32).'
-      }
     ]
   },
   {
@@ -92,16 +80,6 @@ export const LAB_EXPERIMENTS: GuidedLabExperiment[] = [
         title: 'Step 4: Test Real-Time Knob Dragging',
         instruction: 'Run simulation and drag the potentiometer dial across 0 to 1023 to hear the relay click and watch the status LED activate.'
       }
-    ],
-    vivaQuestions: [
-      {
-        q: 'What is the resolution of the Arduino Uno ADC?',
-        a: '10 bits, which converts 0–5V into 2^10 = 1024 discrete steps (0 to 1023), giving ~4.88mV per step.'
-      },
-      {
-        q: 'What do NO and NC mean on a relay terminal block?',
-        a: 'NO = Normally Open (circuit disconnected when unpowered). NC = Normally Closed (circuit connected when unpowered).'
-      }
     ]
   },
   {
@@ -127,12 +105,6 @@ export const LAB_EXPERIMENTS: GuidedLabExperiment[] = [
       {
         title: 'Step 3: Print Real-Time Strings',
         instruction: 'Use lcd.setCursor(col, row) to format multi-line data and lcd.print("Hello Embedded!").'
-      }
-    ],
-    vivaQuestions: [
-      {
-        q: 'Why are pull-up resistors required on I2C lines?',
-        a: 'I2C uses open-drain/open-collector drivers. The bus lines rely on pull-up resistors to pull the lines HIGH when no device is driving them LOW.'
       }
     ]
   },
@@ -160,12 +132,6 @@ export const LAB_EXPERIMENTS: GuidedLabExperiment[] = [
         title: 'Step 3: Test Temperature Sliders',
         instruction: 'Run simulation, open the DHT22 popup, and move the temperature slider above 30°C to verify real-time buzzer alarm.'
       }
-    ],
-    vivaQuestions: [
-      {
-        q: 'What is the difference between DHT11 and DHT22?',
-        a: 'DHT22 (AM2302) has higher precision (±0.5°C vs ±2°C) and wider measurement range (-40°C to +80°C vs 0°C to 50°C).'
-      }
     ]
   }
 ];
@@ -178,9 +144,7 @@ interface Props {
 
 export const GuidedLabPanel: React.FC<Props> = ({ isOpen, onClose, onLoadLabCircuit }) => {
   const [selectedLab, setSelectedLab] = useState<GuidedLabExperiment>(LAB_EXPERIMENTS[0]);
-  const [activeStep, setActiveStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Record<string, number[]>>({});
-  const [showViva, setShowViva] = useState(false);
 
   if (!isOpen) return null;
 
@@ -193,7 +157,6 @@ export const GuidedLabPanel: React.FC<Props> = ({ isOpen, onClose, onLoadLabCirc
   };
 
   const handleQuickLoadLab = () => {
-    // Quick load pre-configured circuit for this lab
     if (selectedLab.id === 'lab-1') {
       onLoadLabCircuit(
         [
@@ -281,7 +244,6 @@ void loop() {
         selectedLab.title
       );
     } else {
-      // IoT / LCD Lab
       onLoadLabCircuit(
         [
           { id: 'esp32', type: 'wokwi-esp32-devkit-v1', top: 100, left: 80, attrs: {} },
@@ -362,12 +324,12 @@ void loop() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-white leading-tight">Guided AI Lab Tutor</h2>
+              <h2 className="text-sm font-bold text-white leading-tight">Guided Lab Tutor</h2>
               <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded">
-                LEARNING
+                EXPERIMENTS
               </span>
             </div>
-            <p className="text-[11px] text-slate-400">Step-by-Step College Engineering Experiments</p>
+            <p className="text-[11px] text-slate-400">Step-by-Step College Engineering Lab</p>
           </div>
         </div>
 
@@ -381,14 +343,13 @@ void loop() {
 
       {/* Lab Experiment Selector Dropdown */}
       <div className="p-4 bg-[#191924] border-b border-slate-800 space-y-2">
-        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select College Lab Experiment</label>
+        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select Experiment</label>
         <select
           value={selectedLab.id}
           onChange={(e) => {
             const found = LAB_EXPERIMENTS.find(l => l.id === e.target.value);
             if (found) {
               setSelectedLab(found);
-              setActiveStep(0);
             }
           }}
           className="w-full bg-slate-900 text-white px-3 py-2 rounded-lg border border-slate-700 focus:outline-none focus:border-emerald-500 text-xs font-semibold"
@@ -406,11 +367,11 @@ void loop() {
           className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 rounded-lg transition shadow-md hover:scale-[1.01] active:scale-[0.99]"
         >
           <Zap size={14} />
-          <span>⚡ Setup Lab Circuit on Canvas</span>
+          <span>⚡ Setup Experiment on Canvas</span>
         </button>
       </div>
 
-      {/* Main Body: Steps, Objectives & Viva */}
+      {/* Main Body: Steps & Objectives */}
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
         {/* Description & Objectives */}
         <div className="space-y-2">
@@ -435,7 +396,7 @@ void loop() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              Interactive Lab Checkpoints ({currentCompleted.length}/{selectedLab.steps.length})
+              Experiment Checkpoints ({currentCompleted.length}/{selectedLab.steps.length})
             </label>
           </div>
 
@@ -472,30 +433,6 @@ void loop() {
               );
             })}
           </div>
-        </div>
-
-        {/* College Viva / Exam Questions Accordion */}
-        <div className="p-4 bg-[#1a1b26] border border-slate-800 rounded-xl space-y-2">
-          <button
-            onClick={() => setShowViva(!showViva)}
-            className="w-full flex items-center justify-between text-xs font-bold text-sky-300 hover:text-sky-200 transition"
-          >
-            <span className="flex items-center gap-1.5">
-              <HelpCircle size={15} /> College Lab Viva / Oral Exam Prep ({selectedLab.vivaQuestions.length})
-            </span>
-            <ChevronDown size={14} className={`transform transition-transform ${showViva ? 'rotate-180' : ''}`} />
-          </button>
-
-          {showViva && (
-            <div className="space-y-3 pt-2 text-xs border-t border-slate-800">
-              {selectedLab.vivaQuestions.map((v, i) => (
-                <div key={i} className="p-2.5 bg-[#14151e] rounded-lg space-y-1 border border-slate-800/80">
-                  <div className="font-semibold text-white">Q: {v.q}</div>
-                  <div className="text-slate-400 text-[11px] font-sans">A: {v.a}</div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>
