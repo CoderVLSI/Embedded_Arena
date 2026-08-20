@@ -15,6 +15,7 @@ import { AiAssistantPanel } from './components/ai/AiAssistantPanel';
 import { GuidedLabPanel } from './components/guided/GuidedLabPanel';
 import { AiProjectDesign } from './services/geminiService';
 import { autoLayoutCircuit, findNextAutoPlaceCoordinate } from './utils/autoLayout';
+import { Cpu, Code2, Terminal } from 'lucide-react';
 
 const defaultProject = STARTER_PROJECTS[0];
 
@@ -76,6 +77,7 @@ const App: React.FC = () => {
   const [aiOpen, setAiOpen] = useState(false);
   const [guidedLabOpen, setGuidedLabOpen] = useState(false);
   const [autoPlaceMode, setAutoPlaceMode] = useState(true);
+  const [mobileTab, setMobileTab] = useState<'canvas' | 'code' | 'terminal'>('canvas');
 
   // Pin manager & runtime (persistent refs)
   const pinManagerRef = useRef(new PinManager());
@@ -248,10 +250,52 @@ const App: React.FC = () => {
         projectName={projectName}
       />
 
-      {/* Main Body: Editor (Left) + Canvas (Right) */}
+      {/* Mobile Tab Bar (< md screens) */}
+      <div className="flex md:hidden items-center justify-around bg-[#1c1d24] border-b border-slate-800 text-xs font-semibold p-1.5 z-20 gap-1">
+        <button
+          onClick={() => setMobileTab('canvas')}
+          className={`flex-1 py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition ${
+            mobileTab === 'canvas'
+              ? 'bg-sky-600 text-white shadow-md'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+          }`}
+        >
+          <Cpu size={14} />
+          <span>Canvas</span>
+        </button>
+        <button
+          onClick={() => setMobileTab('code')}
+          className={`flex-1 py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition ${
+            mobileTab === 'code'
+              ? 'bg-sky-600 text-white shadow-md'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+          }`}
+        >
+          <Code2 size={14} />
+          <span>Code Editor</span>
+        </button>
+        <button
+          onClick={() => setMobileTab('terminal')}
+          className={`flex-1 py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition ${
+            mobileTab === 'terminal'
+              ? 'bg-sky-600 text-white shadow-md'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+          }`}
+        >
+          <Terminal size={14} />
+          <span>Terminal</span>
+          {serialLogs.length > 0 && (
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          )}
+        </button>
+      </div>
+
+      {/* Main Body: Desktop Split View / Mobile Single Tab View */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel: Code Editor */}
-        <div className="w-[420px] min-w-[340px] flex flex-col border-r border-[#2d2d2d]">
+        {/* Left Panel: Code Editor (Desktop always visible, Mobile when tab is 'code') */}
+        <div className={`w-full md:w-[420px] md:min-w-[340px] flex flex-col border-r border-[#2d2d2d] ${
+          mobileTab === 'code' ? 'flex' : 'hidden md:flex'
+        }`}>
           <div className="flex-1 overflow-hidden">
             <CodeEditor
               inoCode={inoCode}
@@ -265,10 +309,14 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Panel: Circuit Canvas + Terminal */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Circuit Canvas */}
-          <div className="flex-1 relative overflow-hidden">
+        {/* Right Panel: Circuit Canvas + Terminal (Desktop split, Mobile when tab is 'canvas' or 'terminal') */}
+        <div className={`flex-1 flex flex-col overflow-hidden ${
+          mobileTab !== 'code' ? 'flex' : 'hidden md:flex'
+        }`}>
+          {/* Circuit Canvas (Visible on desktop OR mobile tab 'canvas') */}
+          <div className={`flex-1 relative overflow-hidden ${
+            mobileTab === 'terminal' ? 'hidden md:block' : 'block'
+          }`}>
             <CircuitCanvas
               components={components}
               wires={wires}
@@ -285,15 +333,19 @@ const App: React.FC = () => {
             />
           </div>
 
-          {/* Bottom Terminal Panel */}
-          <TerminalPanel
-            logs={serialLogs}
-            onClearLogs={() => setSerialLogs([])}
-            onSendSerialInput={(text) => runtimeRef.current.sendSerialInput(text)}
-            pinManager={pinManagerRef.current}
-            baudRate={baudRate}
-            onChangeBaudRate={setBaudRate}
-          />
+          {/* Terminal Panel (Visible on desktop bottom OR full screen on mobile tab 'terminal') */}
+          <div className={`${
+            mobileTab === 'terminal' ? 'flex-1 flex flex-col' : 'block'
+          } ${mobileTab === 'canvas' ? 'hidden md:block' : 'block'}`}>
+            <TerminalPanel
+              logs={serialLogs}
+              onClearLogs={() => setSerialLogs([])}
+              onSendSerialInput={(text) => runtimeRef.current.sendSerialInput(text)}
+              pinManager={pinManagerRef.current}
+              baudRate={baudRate}
+              onChangeBaudRate={setBaudRate}
+            />
+          </div>
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { generateProjectWithGemini, AiProjectDesign } from '../../services/geminiService';
 import { Sparkles, Key, ArrowRight, Check, Play, Cpu, Layers, Code, Zap, X, ChevronRight } from 'lucide-react';
 
@@ -61,7 +61,7 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-[440px] bg-[#16161d] border-l border-slate-700/80 shadow-2xl z-40 flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
+    <div className="fixed inset-y-0 right-0 w-full sm:w-[460px] max-w-full bg-[#16161d] border-l border-slate-700/80 shadow-2xl z-40 flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3.5 bg-[#1e1e28] border-b border-slate-800">
         <div className="flex items-center gap-2.5">

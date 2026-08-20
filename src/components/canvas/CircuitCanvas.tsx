@@ -141,6 +141,39 @@ export const CircuitCanvas: React.FC<Props> = ({
     setDraggingCompId(null);
   };
 
+  // Touch handlers for mobile / tablet devices
+  const handleTouchStartCanvas = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      setIsPanning(true);
+      setPanStart({ x: touch.clientX - pan.x, y: touch.clientY - pan.y });
+    }
+  };
+
+  const handleTouchMoveCanvas = (e: React.TouchEvent) => {
+    if (!containerRef.current || e.touches.length === 0) return;
+    const touch = e.touches[0];
+    const rect = containerRef.current.getBoundingClientRect();
+    const canvasX = (touch.clientX - rect.left - pan.x) / zoom;
+    const canvasY = (touch.clientY - rect.top - pan.y) / zoom;
+
+    if (isPanning) {
+      setPan({ x: touch.clientX - panStart.x, y: touch.clientY - panStart.y });
+    } else if (draggingCompId) {
+      const comp = components.find((c) => c.id === draggingCompId);
+      if (comp) {
+        const newLeft = Math.round((canvasX - dragOffset.x) / 10) * 10;
+        const newTop = Math.round((canvasY - dragOffset.y) / 10) * 10;
+        onUpdateComponentPosition(draggingCompId, Math.max(0, newLeft), Math.max(0, newTop));
+      }
+    }
+  };
+
+  const handleTouchEndCanvas = () => {
+    setIsPanning(false);
+    setDraggingCompId(null);
+  };
+
   const handlePinClick = (compId: string, pinId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const comp = components.find((c) => c.id === compId);
@@ -440,10 +473,13 @@ export const CircuitCanvas: React.FC<Props> = ({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full bg-[#1b1c20] overflow-hidden canvas-grid select-none cursor-crosshair"
+      className="relative w-full h-full bg-[#1b1c20] overflow-hidden canvas-grid select-none cursor-crosshair touch-none"
       onMouseDown={handleMouseDownCanvas}
       onMouseMove={handleMouseMoveCanvas}
       onMouseUp={handleMouseUpCanvas}
+      onTouchStart={handleTouchStartCanvas}
+      onTouchMove={handleTouchMoveCanvas}
+      onTouchEnd={handleTouchEndCanvas}
     >
       {/* Zoom / Pan Container */}
       <div

@@ -51,44 +51,44 @@ export const TopNavBar: React.FC<Props> = ({
   };
 
   return (
-    <div className="flex items-center justify-between h-11 px-3 bg-[#18181c] border-b border-[#2a2a30] select-none shadow-md z-30">
-      {/* Left: Authentic Wokwi-style Logo & Controls */}
-      <div className="flex items-center gap-3">
+    <div className="flex items-center justify-between h-12 sm:h-11 px-2 sm:px-3 bg-[#18181c] border-b border-[#2a2a30] select-none shadow-md z-30 overflow-x-auto no-scrollbar">
+      {/* Left: Authentic Logo & Controls */}
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
         {/* Clean Logo */}
-        <div className="flex items-center gap-2 pr-2 border-r border-[#2d2d35]">
-          <div className="flex items-center gap-1.5 cursor-pointer">
-            <span className="font-extrabold tracking-tighter text-base text-white font-sans">
+        <div className="flex items-center gap-1.5 pr-1.5 sm:pr-2 border-r border-[#2d2d35]">
+          <div className="flex items-center gap-1 cursor-pointer">
+            <span className="font-extrabold tracking-tighter text-sm sm:text-base text-white font-sans">
               EMBEDDED<span className="text-sky-400">ARENA</span>
             </span>
           </div>
         </div>
 
         {/* Simulation Run / Pause / Stop Button */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           {!simState.isRunning ? (
             <button
               onClick={onPlay}
-              className="flex items-center gap-1.5 bg-[#22c55e] hover:bg-[#16a34a] text-white px-3 py-1 rounded text-xs font-bold transition shadow-sm"
+              className="flex items-center gap-1.5 bg-[#22c55e] hover:bg-[#16a34a] text-white px-2.5 sm:px-3 py-1 rounded text-xs font-bold transition shadow-sm active:scale-95"
             >
-              <Play size={13} fill="currentColor" /> Run
+              <Play size={13} fill="currentColor" /> <span className="font-bold">Run</span>
             </button>
           ) : (
             <>
               <button
                 onClick={onPause}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold transition ${
+                className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded text-xs font-semibold transition ${
                   simState.isPaused
                     ? 'bg-amber-600 hover:bg-amber-500 text-white'
                     : 'bg-amber-600/20 hover:bg-amber-600/40 text-amber-300 border border-amber-600/50'
                 }`}
               >
-                <Pause size={12} /> {simState.isPaused ? 'Resume' : 'Pause'}
+                <Pause size={12} /> <span className="hidden sm:inline">{simState.isPaused ? 'Resume' : 'Pause'}</span>
               </button>
               <button
                 onClick={onStop}
-                className="flex items-center gap-1 bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-700/50 px-2.5 py-1 rounded text-xs font-semibold transition"
+                className="flex items-center gap-1 bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-700/50 px-2 sm:px-2.5 py-1 rounded text-xs font-semibold transition"
               >
-                <Square size={12} fill="currentColor" /> Stop
+                <Square size={12} fill="currentColor" /> <span className="hidden sm:inline">Stop</span>
               </button>
             </>
           )}
@@ -96,7 +96,7 @@ export const TopNavBar: React.FC<Props> = ({
           {/* Add Part (+) Button */}
           <button
             onClick={onAddComponent}
-            className="flex items-center justify-center w-7 h-7 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-bold transition shadow"
+            className="flex items-center justify-center w-7 h-7 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-bold transition shadow active:scale-95"
             title="Add Electronics Component"
           >
             <Plus size={15} />
@@ -105,32 +105,32 @@ export const TopNavBar: React.FC<Props> = ({
 
         {/* Timer */}
         {simState.isRunning && (
-          <div className="flex items-center gap-1 text-[11px] text-slate-300 font-mono bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
+          <div className="flex items-center gap-1 text-[11px] text-slate-300 font-mono bg-slate-800/80 px-1.5 sm:px-2 py-0.5 rounded border border-slate-700 shrink-0">
             <Zap size={11} className="text-emerald-400" />
             <span className="text-emerald-300 font-semibold">{formatTime(simState.timeMs)}</span>
           </div>
         )}
       </div>
 
-      {/* Center: Project Title */}
-      <div className="hidden md:flex items-center gap-2 text-xs text-slate-300 font-medium truncate max-w-md">
+      {/* Center: Project Title (Desktop only) */}
+      <div className="hidden lg:flex items-center gap-2 text-xs text-slate-300 font-medium truncate max-w-md px-2">
         <span className="text-slate-400">Project:</span>
         <span className="text-white font-semibold truncate">{projectName}</span>
       </div>
 
-      {/* Right: Actions (Examples, Docs, Share, Export) */}
-      <div className="flex items-center gap-2">
+      {/* Right: Actions */}
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         {/* Load Example Dropdown */}
         <div className="relative">
           <button
             onClick={() => setShowExamples(!showExamples)}
-            className="flex items-center gap-1.5 bg-[#25252b] hover:bg-[#2f2f37] text-slate-200 px-2.5 py-1 rounded text-xs font-medium transition border border-slate-700"
+            className="flex items-center gap-1 sm:gap-1.5 bg-[#25252b] hover:bg-[#2f2f37] text-slate-200 px-2 sm:px-2.5 py-1 rounded text-xs font-medium transition border border-slate-700"
           >
-            <FolderOpen size={13} /> Examples <ChevronDown size={11} />
+            <FolderOpen size={13} /> <span className="hidden md:inline">Examples</span> <ChevronDown size={11} />
           </button>
 
           {showExamples && (
-            <div className="absolute right-0 top-full mt-1.5 w-80 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-[400px] overflow-y-auto">
+            <div className="absolute right-0 top-full mt-1.5 w-72 sm:w-80 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-[400px] overflow-y-auto">
               <div className="p-2.5 border-b border-slate-800">
                 <p className="text-[11px] text-slate-400 font-semibold">Starter Circuits</p>
               </div>
@@ -154,37 +154,37 @@ export const TopNavBar: React.FC<Props> = ({
         {/* Guided AI Lab Tutor Button */}
         <button
           onClick={onOpenGuidedLab}
-          className="flex items-center gap-1.5 bg-[#1f2937] hover:bg-[#374151] text-emerald-300 border border-emerald-500/40 px-2.5 py-1 rounded text-xs font-semibold transition shadow hover:scale-105 active:scale-95"
+          className="flex items-center gap-1 bg-[#1f2937] hover:bg-[#374151] text-emerald-300 border border-emerald-500/40 px-2 sm:px-2.5 py-1 rounded text-xs font-semibold transition shadow hover:scale-105 active:scale-95"
           title="Open Step-by-Step Guided Lab Mode"
         >
           <GraduationCap size={14} className="text-emerald-400" />
-          <span>Guided Lab</span>
+          <span className="hidden sm:inline">Guided Lab</span>
         </button>
 
         {/* AI Circuit Assistant (Beta) Button */}
         <button
           onClick={onOpenAiAssistant}
-          className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-sky-600 hover:from-purple-500 hover:to-sky-500 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-md hover:scale-105 active:scale-95"
+          className="flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-purple-600 to-sky-600 hover:from-purple-500 hover:to-sky-500 text-white px-2 sm:px-2.5 py-1 rounded text-xs font-bold transition shadow-md hover:scale-105 active:scale-95"
           title="Open AI Circuit Architect"
         >
           <Sparkles size={13} className="animate-pulse text-yellow-300" />
-          <span>AI Assistant</span>
+          <span className="hidden sm:inline">AI Assistant</span>
           <span className="text-[9px] bg-black/30 px-1 py-0.2 rounded font-mono">BETA</span>
         </button>
 
         {/* Documentation Button */}
         <button
           onClick={onOpenDocs}
-          className="flex items-center gap-1 text-slate-300 hover:text-white bg-[#25252b] hover:bg-[#2f2f37] border border-slate-700 px-2.5 py-1 rounded text-xs font-medium transition"
+          className="flex items-center gap-1 text-slate-300 hover:text-white bg-[#25252b] hover:bg-[#2f2f37] border border-slate-700 px-2 sm:px-2.5 py-1 rounded text-xs font-medium transition"
         >
           <BookOpen size={13} className="text-sky-400" />
-          Docs
+          <span className="hidden sm:inline">Docs</span>
         </button>
 
         {/* Share Button */}
         <button
           onClick={handleShare}
-          className="flex items-center gap-1 text-slate-300 hover:text-white bg-[#25252b] hover:bg-[#2f2f37] border border-slate-700 px-2.5 py-1 rounded text-xs font-medium transition"
+          className="hidden sm:flex items-center gap-1 text-slate-300 hover:text-white bg-[#25252b] hover:bg-[#2f2f37] border border-slate-700 px-2.5 py-1 rounded text-xs font-medium transition"
           title="Copy project link"
         >
           <Share2 size={13} />
@@ -205,7 +205,7 @@ export const TopNavBar: React.FC<Props> = ({
           href="https://github.com/CoderVLSI/Embedded_Arena"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 text-slate-400 hover:text-white p-1.5 rounded hover:bg-slate-800 transition"
+          className="hidden sm:flex items-center gap-1 text-slate-400 hover:text-white p-1.5 rounded hover:bg-slate-800 transition"
           title="GitHub Repository"
         >
           <ExternalLink size={15} />

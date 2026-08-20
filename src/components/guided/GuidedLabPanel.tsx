@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CircuitComponent, WireConnection } from '../../types/circuit';
 import { generateGuidedLabWithGemini, AiGuidedLab } from '../../services/geminiService';
 import {
@@ -366,7 +366,7 @@ void loop() {
   };
 
   return (
-    <div className="fixed inset-y-0 left-0 w-[460px] bg-[#15151c] border-r border-slate-700/80 shadow-2xl z-40 flex flex-col overflow-hidden animate-in slide-in-from-left duration-200 text-slate-200">
+    <div className="fixed inset-y-0 left-0 w-full sm:w-[460px] max-w-full bg-[#15151c] border-r border-slate-700/80 shadow-2xl z-40 flex flex-col overflow-hidden animate-in slide-in-from-left duration-200 text-slate-200">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3.5 bg-[#1d1d28] border-b border-slate-800">
         <div className="flex items-center gap-2.5">
