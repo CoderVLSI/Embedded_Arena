@@ -8,6 +8,46 @@ export interface AiProjectDesign {
   wires: WireConnection[];
   inoCode: string;
   libraries: string[];
+  source?: 'gemini' | 'synthesizer';
+  modelUsed?: string;
+}
+
+export async function testGeminiApiKey(apiKey: string): Promise<{ success: boolean; message: string; modelUsed?: string }> {
+  const cleanKey = apiKey.trim();
+  if (!cleanKey) {
+    return { success: false, message: 'Please enter a valid Google Gemini API Key' };
+  }
+
+  const testModels = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-pro'];
+
+  for (const model of testModels) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cleanKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: 'Hello, respond with {"status":"ok"}' }] }],
+            generationConfig: { maxOutputTokens: 30 }
+          })
+        }
+      );
+
+      if (res.ok) {
+        return { success: true, message: `Key Verified! Connected to ${model}`, modelUsed: model };
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        if (errData?.error?.message && res.status === 400 && errData.error.message.includes('API key')) {
+          return { success: false, message: `API Key Invalid: ${errData.error.message}` };
+        }
+      }
+    } catch (err: any) {
+      // try next model
+    }
+  }
+
+  return { success: false, message: 'Could not connect to Gemini API. Check your internet or API key permissions.' };
 }
 
 export async function generateProjectWithGemini(
@@ -15,21 +55,25 @@ export async function generateProjectWithGemini(
   apiKey?: string
 ): Promise<AiProjectDesign> {
   const cleanPrompt = prompt.trim();
+  const cleanKey = apiKey ? apiKey.trim() : '';
 
-  // If user provided Gemini API Key, attempt live API call
-  if (apiKey && apiKey.trim().length > 5) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: `You are an expert embedded systems engineer and circuit designer for an Arduino/ESP32 Wokwi-style simulator.
+  // If user provided Gemini API Key, attempt live API call with model fallbacks
+  if (cleanKey.length > 5) {
+    const candidateModels = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-pro'];
+
+    for (const model of candidateModels) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cleanKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    {
+                      text: `You are an expert embedded systems engineer and circuit designer for an Arduino/ESP32 Wokwi-style simulator.
 Design a complete electronic circuit and Arduino C++ code based on this user prompt: "${cleanPrompt}".
 
 Available component types:
@@ -56,41 +100,52 @@ Respond ONLY with valid, raw JSON (no markdown fences, no backticks, just pure J
   "inoCode": "// full complete Arduino C++ code here...",
   "libraries": ["DHT sensor library"]
 }`
-                  }
-                ]
+                    }
+                  ]
+                }
+              ],
+              generationConfig: {
+                temperature: 0.2
               }
-            ],
-            generationConfig: {
-              temperature: 0.2,
-              responseMimeType: 'application/json'
-            }
-          })
-        }
-      );
+            })
+          }
+        );
 
-      if (response.ok) {
-        const data = await response.json();
-        const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (rawJson) {
-          const parsed = JSON.parse(rawJson);
-          return {
-            title: parsed.title || 'AI Generated Circuit',
-            description: parsed.description || cleanPrompt,
-            explanation: parsed.explanation || 'Custom AI-designed embedded circuit.',
-            components: parsed.components || [],
-            wires: parsed.wires || [],
-            inoCode: parsed.inoCode || '// No code generated',
-            libraries: parsed.libraries || []
-          };
+        if (response.ok) {
+          const data = await response.json();
+          let rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (rawJson) {
+            rawJson = rawJson.trim();
+            if (rawJson.startsWith('```')) {
+              rawJson = rawJson.replace(/^```(json)?\n?/, '').replace(/\n?```$/, '').trim();
+            }
+            const parsed = JSON.parse(rawJson);
+            return {
+              title: parsed.title || 'AI Generated Circuit',
+              description: parsed.description || cleanPrompt,
+              explanation: parsed.explanation || 'Custom AI-designed embedded circuit.',
+              components: parsed.components || [],
+              wires: parsed.wires || [],
+              inoCode: parsed.inoCode || '// No code generated',
+              libraries: parsed.libraries || [],
+              source: 'gemini',
+              modelUsed: model
+            };
+          }
         }
+      } catch (err) {
+        console.warn(`Attempt with ${model} failed, trying next candidate...`, err);
       }
-    } catch (err) {
-      console.warn('Gemini API call failed, falling back to smart embedded synthesis engine:', err);
     }
   }
 
   // Smart Embedded AI Circuit Synthesizer (Instant local generator)
-  return synthesizeCircuitLocally(cleanPrompt);
+  const local = synthesizeCircuitLocally(cleanPrompt);
+  return {
+    ...local,
+    source: 'synthesizer',
+    modelUsed: 'Smart Embedded Synthesizer (Offline Engine)'
+  };
 }
 
 export interface AiGuidedLab {

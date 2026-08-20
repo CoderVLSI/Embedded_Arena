@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { generateProjectWithGemini, AiProjectDesign } from '../../services/geminiService';
-import { Sparkles, Key, ArrowRight, Check, Play, Cpu, Layers, Code, Zap, X, ChevronRight } from 'lucide-react';
+﻿import React, { useState, useEffect } from 'react';
+import { generateProjectWithGemini, testGeminiApiKey, AiProjectDesign } from '../../services/geminiService';
+import {
+  Sparkles, Key, ArrowRight, Check, Play, Cpu, Layers, Code, Zap, X,
+  ChevronRight, CheckCircle2, AlertCircle, RefreshCw, Eye, EyeOff, Save
+} from 'lucide-react';
 
 interface Props {
   isOpen: boolean;
@@ -18,19 +21,62 @@ const QUICK_PROMPTS = [
 export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProject }) => {
   const [prompt, setPrompt] = useState('');
   const [apiKey, setApiKey] = useState('');
+  const [tempApiKey, setTempApiKey] = useState('');
   const [showKeyInput, setShowKeyInput] = useState(false);
+  const [showKeyPassword, setShowKeyPassword] = useState(false);
+  const [isTestingKey, setIsTestingKey] = useState(false);
+  const [keyStatus, setKeyStatus] = useState<{ type: 'idle' | 'success' | 'error'; message: string }>({
+    type: 'idle',
+    message: '',
+  });
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedDesign, setGeneratedDesign] = useState<AiProjectDesign | null>(null);
   const [applied, setApplied] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('gemini_api_key');
-    if (saved) setApiKey(saved);
+    if (saved) {
+      setApiKey(saved);
+      setTempApiKey(saved);
+      setKeyStatus({
+        type: 'success',
+        message: 'API Key loaded from local storage.',
+      });
+    }
   }, []);
 
-  const handleSaveKey = (key: string) => {
-    setApiKey(key);
-    localStorage.setItem('gemini_api_key', key);
+  const handleSaveAndTestKey = async () => {
+    const clean = tempApiKey.trim();
+    if (!clean) {
+      setApiKey('');
+      localStorage.removeItem('gemini_api_key');
+      setKeyStatus({
+        type: 'idle',
+        message: 'Key cleared. Running in Offline Synthesizer mode.',
+      });
+      return;
+    }
+
+    setIsTestingKey(true);
+    setKeyStatus({ type: 'idle', message: 'Testing connection to Google Gemini API...' });
+
+    const result = await testGeminiApiKey(clean);
+    setIsTestingKey(false);
+
+    if (result.success) {
+      setApiKey(clean);
+      localStorage.setItem('gemini_api_key', clean);
+      setKeyStatus({
+        type: 'success',
+        message: `✓ ${result.message}`,
+      });
+    } else {
+      setKeyStatus({
+        type: 'error',
+        message: result.message,
+      });
+    }
   };
 
   const handleGenerate = async (targetPrompt?: string) => {
@@ -40,7 +86,8 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
     setIsGenerating(true);
     setApplied(false);
     try {
-      const design = await generateProjectWithGemini(p, apiKey);
+      const activeKey = apiKey || tempApiKey;
+      const design = await generateProjectWithGemini(p, activeKey);
       setGeneratedDesign(design);
     } catch (err) {
       console.error(err);
@@ -79,15 +126,18 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => setShowKeyInput(!showKeyInput)}
-            className={`p-1.5 rounded-lg transition ${
-              apiKey ? 'text-emerald-400 hover:bg-emerald-950/40' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg border transition ${
+              apiKey
+                ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-400 hover:bg-emerald-900/50'
+                : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
-            title="Configure Gemini API Key (Optional)"
+            title="Configure Gemini API Key"
           >
-            <Key size={16} />
+            <Key size={13} />
+            <span className="font-semibold">{apiKey ? 'Key Set' : 'Set Key'}</span>
           </button>
           <button
             onClick={onClose}
@@ -98,30 +148,90 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
         </div>
       </div>
 
-      {/* Optional Gemini API Key Drawer */}
+      {/* Gemini API Key Configuration Drawer */}
       {showKeyInput && (
-        <div className="p-4 bg-[#1a1a24] border-b border-slate-800 space-y-2 text-xs">
+        <div className="p-4 bg-[#191924] border-b border-slate-800 space-y-2.5 text-xs animate-in fade-in duration-150">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-slate-200 flex items-center gap-1.5">
-              <Key size={13} className="text-sky-400" /> Google Gemini API Key
+            <span className="font-bold text-slate-200 flex items-center gap-1.5">
+              <Key size={14} className="text-sky-400" /> Google Gemini API Key
             </span>
             <a
               href="https://aistudio.google.com/app/apikey"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[11px] text-sky-400 hover:underline"
+              className="text-[11px] text-sky-400 hover:underline flex items-center gap-0.5 font-semibold"
             >
-              Get Free Key
+              Get Free Key &rarr;
             </a>
           </div>
-          <input
-            type="password"
-            placeholder="AIzaSy... (leave blank to use smart offline engine)"
-            value={apiKey}
-            onChange={(e) => handleSaveKey(e.target.value)}
-            className="w-full bg-slate-900 text-white px-3 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-sky-500 font-mono text-[11px]"
-          />
-          <p className="text-[10px] text-slate-400">Your key is stored securely only in your browser's localStorage.</p>
+
+          <div className="relative flex items-center">
+            <input
+              type={showKeyPassword ? 'text' : 'password'}
+              placeholder="Paste AIzaSy... key here"
+              value={tempApiKey}
+              onChange={(e) => {
+                setTempApiKey(e.target.value);
+                setKeyStatus({ type: 'idle', message: '' });
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && handleSaveAndTestKey()}
+              className="w-full bg-slate-900 text-white pl-3 pr-10 py-2 rounded-lg border border-slate-700 focus:outline-none focus:border-sky-500 font-mono text-[11px]"
+            />
+            <button
+              type="button"
+              onClick={() => setShowKeyPassword(!showKeyPassword)}
+              className="absolute right-2.5 text-slate-400 hover:text-slate-200 p-1"
+            >
+              {showKeyPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+            </button>
+          </div>
+
+          {/* Save & Confirm Action Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSaveAndTestKey}
+              disabled={isTestingKey}
+              className="flex-1 flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition shadow active:scale-95"
+            >
+              {isTestingKey ? (
+                <>
+                  <RefreshCw size={13} className="animate-spin" />
+                  <span>Verifying Key with Gemini...</span>
+                </>
+              ) : (
+                <>
+                  <Save size={13} />
+                  <span>Save & Verify Key</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Real-time Key Status Feedback */}
+          {keyStatus.message && (
+            <div
+              className={`p-2 rounded-lg text-[11px] flex items-center gap-1.5 border ${
+                keyStatus.type === 'success'
+                  ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-300'
+                  : keyStatus.type === 'error'
+                  ? 'bg-red-950/40 border-red-500/50 text-red-300'
+                  : 'bg-slate-800/60 border-slate-700 text-slate-300'
+              }`}
+            >
+              {keyStatus.type === 'success' ? (
+                <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
+              ) : keyStatus.type === 'error' ? (
+                <AlertCircle size={14} className="text-red-400 shrink-0" />
+              ) : (
+                <Key size={14} className="text-sky-400 shrink-0" />
+              )}
+              <span className="leading-snug">{keyStatus.message}</span>
+            </div>
+          )}
+
+          <p className="text-[10px] text-slate-400">
+            Stored only in your browser. If left empty, the built-in offline smart synthesizer will be used.
+          </p>
         </div>
       )}
 
@@ -153,7 +263,7 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
           <div className="relative">
             <textarea
               rows={3}
-              placeholder="e.g. Design an ESP32 Smart Thermostat with DHT22, 16x2 LCD, and buzzer alarm when temperature > 30°C..."
+              placeholder="e.g. Design a Stack-chan robot with dual servo motors, OLED face display, and ESP32..."
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               className="w-full bg-slate-900/90 text-white p-3 rounded-xl border border-slate-700 focus:outline-none focus:border-purple-500 text-xs placeholder:text-slate-500 resize-none shadow-inner"
@@ -168,7 +278,7 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
             {isGenerating ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Synthesizing Circuit Architecture...</span>
+                <span>Synthesizing with Gemini AI...</span>
               </>
             ) : (
               <>
@@ -193,19 +303,23 @@ export const AiAssistantPanel: React.FC<Props> = ({ isOpen, onClose, onApplyProj
                 </div>
               </div>
 
-              {/* Stats badges */}
-              <div className="flex items-center gap-2 text-[11px] font-mono">
+              {/* Source & Stats badges */}
+              <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono">
+                {generatedDesign.source === 'gemini' ? (
+                  <span className="bg-emerald-950/60 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/40 flex items-center gap-1">
+                    <Sparkles size={11} className="text-yellow-300" /> Live Gemini AI ({generatedDesign.modelUsed})
+                  </span>
+                ) : (
+                  <span className="bg-slate-800 text-sky-300 px-2 py-0.5 rounded border border-slate-700">
+                    ⚡ Smart Synthesizer Engine
+                  </span>
+                )}
                 <span className="bg-slate-800 text-sky-300 px-2 py-0.5 rounded border border-slate-700">
                   {generatedDesign.components.length} Components
                 </span>
                 <span className="bg-slate-800 text-emerald-300 px-2 py-0.5 rounded border border-slate-700">
                   {generatedDesign.wires.length} Wires
                 </span>
-                {generatedDesign.libraries.length > 0 && (
-                  <span className="bg-slate-800 text-purple-300 px-2 py-0.5 rounded border border-slate-700">
-                    {generatedDesign.libraries.length} Libraries
-                  </span>
-                )}
               </div>
 
               {/* College Lab Explanation */}
