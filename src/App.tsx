@@ -11,6 +11,8 @@ import { CircuitCanvas } from './components/canvas/CircuitCanvas';
 import { ComponentPalette } from './components/canvas/ComponentPalette';
 import { TerminalPanel } from './components/terminal/TerminalPanel';
 import { DocsModal } from './components/docs/DocsModal';
+import { AiAssistantPanel } from './components/ai/AiAssistantPanel';
+import { AiProjectDesign } from './services/geminiService';
 
 const defaultProject = STARTER_PROJECTS[0];
 
@@ -66,9 +68,10 @@ const App: React.FC = () => {
   const [serialLogs, setSerialLogs] = useState<SerialLogMessage[]>([]);
   const [baudRate, setBaudRate] = useState(9600);
 
-  // Component palette & Docs modals
+  // Component palette, Docs & AI Assistant modals
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
 
   // Pin manager & runtime (persistent refs)
   const pinManagerRef = useRef(new PinManager());
@@ -80,6 +83,28 @@ const App: React.FC = () => {
   }, [components, wires]);
 
   // ---------- SIMULATION CALLBACKS ----------
+  const handleStop = useCallback(() => {
+    runtimeRef.current.stop();
+    i2cBus.resetAll();
+  }, []);
+
+  const handlePause = useCallback(() => {
+    runtimeRef.current.pause();
+  }, []);
+
+  // ---------- AI PROJECT DESIGN HANDLER ----------
+  const handleApplyAiDesign = useCallback((design: AiProjectDesign) => {
+    handleStop();
+    setComponents(design.components);
+    setWires(design.wires);
+    setInoCode(design.inoCode);
+    setLibraries(design.libraries);
+    setProjectName(design.title);
+    setSerialLogs([]);
+    i2cBus.resetAll();
+    pinManagerRef.current.reset();
+  }, [handleStop]);
+
   const handlePlay = useCallback(() => {
     const pm = pinManagerRef.current;
     const rt = runtimeRef.current;
@@ -100,15 +125,6 @@ const App: React.FC = () => {
     setSerialLogs([]);
     rt.start(inoCode);
   }, [components, wires, inoCode]);
-
-  const handlePause = useCallback(() => {
-    runtimeRef.current.pause();
-  }, []);
-
-  const handleStop = useCallback(() => {
-    runtimeRef.current.stop();
-    i2cBus.resetAll();
-  }, []);
 
   // ---------- COMPONENT & WIRE MANAGEMENT ----------
   const handleUpdateComponentPosition = useCallback((id: string, left: number, top: number) => {
@@ -197,6 +213,7 @@ const App: React.FC = () => {
         onAddComponent={() => setPaletteOpen(true)}
         onExportProject={handleExportProject}
         onOpenDocs={() => setDocsOpen(true)}
+        onOpenAiAssistant={() => setAiOpen(true)}
         projectName={projectName}
       />
 
@@ -257,6 +274,13 @@ const App: React.FC = () => {
       <DocsModal
         isOpen={docsOpen}
         onClose={() => setDocsOpen(false)}
+      />
+
+      {/* AI Assistant (Beta) Sidebar */}
+      <AiAssistantPanel
+        isOpen={aiOpen}
+        onClose={() => setAiOpen(false)}
+        onApplyProject={handleApplyAiDesign}
       />
     </div>
   );

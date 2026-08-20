@@ -1,10 +1,10 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { STARTER_PROJECTS } from '../../engine/examples';
 import { ProjectFile } from '../../types/circuit';
 import { SimulationState } from '../../types/simulation';
 import {
   Play, Pause, Square, Plus, FolderOpen, Download,
-  BookOpen, ChevronDown, Zap, ExternalLink, Heart, Share2
+  BookOpen, ChevronDown, Zap, ExternalLink, Heart, Share2, Sparkles
 } from 'lucide-react';
 
 interface Props {
@@ -16,6 +16,7 @@ interface Props {
   onAddComponent: () => void;
   onExportProject: () => void;
   onOpenDocs: () => void;
+  onOpenAiAssistant?: () => void;
   projectName: string;
 }
 
@@ -28,6 +29,7 @@ export const TopNavBar: React.FC<Props> = ({
   onAddComponent,
   onExportProject,
   onOpenDocs,
+  onOpenAiAssistant,
   projectName,
 }) => {
   const [showExamples, setShowExamples] = useState(false);
@@ -146,6 +148,17 @@ export const TopNavBar: React.FC<Props> = ({
             </div>
           )}
         </div>
+
+        {/* AI Circuit Assistant (Beta) Button */}
+        <button
+          onClick={onOpenAiAssistant}
+          className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-sky-600 hover:from-purple-500 hover:to-sky-500 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-md hover:scale-105 active:scale-95"
+          title="Open AI Circuit Architect"
+        >
+          <Sparkles size={13} className="animate-pulse text-yellow-300" />
+          <span>AI Assistant</span>
+          <span className="text-[9px] bg-black/30 px-1 py-0.2 rounded font-mono">BETA</span>
+        </button>
 
         {/* Documentation Button */}
         <button
